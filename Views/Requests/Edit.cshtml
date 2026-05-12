@@ -1,0 +1,214 @@
+﻿@model Sakany.Models.Request
+@{
+    ViewData["Title"] = "Manage Request";
+    var role = Context.Session.GetString("UserRole");
+}
+
+<div class="container py-4" style="max-width:600px">
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary mb-3">
+        <i class="bi bi-arrow-left me-1"></i>Back
+    </a>
+
+    <div class="form-card">
+        <div class="form-card-header">
+            <i class="bi bi-check2-square me-2"></i>Manage Rental Request
+        </div>
+        <div class="form-card-body">
+
+            <!-- Request summary -->
+            <div class="info-row">
+                <span class="info-label"><i class="bi bi-person me-1"></i>Tenant</span>
+                <span class="info-value">@Model.Client?.Name</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label"><i class="bi bi-buildings me-1"></i>Property</span>
+                <span class="info-value">@Model.Property?.Address</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label"><i class="bi bi-geo-alt me-1"></i>City</span>
+                <span class="info-value">@Model.Property?.City</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label"><i class="bi bi-calendar3 me-1"></i>Submitted</span>
+                <span class="info-value">@Model.Date.ToString("dd MMM yyyy")</span>
+            </div>
+            <div class="info-row mb-4">
+                <span class="info-label">Current Status</span>
+                <span class="status-badge
+                    @(Model.Status == Sakany.Models.RequestStatus.Pending ? "status-pending" :
+                                            Model.Status == Sakany.Models.RequestStatus.Approved ? "status-approved" : "status-rejected")">
+                    @Model.Status
+                </span>
+            </div>
+
+            <hr />
+
+            <form asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="ID" />
+
+                <div class="mb-4">
+                    <label class="form-label fw-600">Update Status</label>
+                    <div class="status-options">
+                        <label class="status-option">
+                            <input type="radio" name="Status" value="0"
+                                   @(Model.Status == Sakany.Models.RequestStatus.Pending ? "checked" : "") />
+                            <div class="status-option-box pending-box">
+                                <i class="bi bi-clock"></i>
+                                <span>Pending</span>
+                            </div>
+                        </label>
+                        <label class="status-option">
+                            <input type="radio" name="Status" value="1"
+                                   @(Model.Status == Sakany.Models.RequestStatus.Approved ? "checked" : "") />
+                            <div class="status-option-box approve-box">
+                                <i class="bi bi-check-circle"></i>
+                                <span>Approve</span>
+                            </div>
+                        </label>
+                        <label class="status-option">
+                            <input type="radio" name="Status" value="2"
+                                   @(Model.Status == Sakany.Models.RequestStatus.Rejected ? "checked" : "") />
+                            <div class="status-option-box reject-box">
+                                <i class="bi bi-x-circle"></i>
+                                <span>Reject</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-danger px-4">
+                        <i class="bi bi-save me-2"></i>Save Decision
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .fw-600 {
+        font-weight: 600;
+    }
+
+    .form-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+    .form-card-header {
+        background: linear-gradient(135deg,#1a1a2e,#0f3460);
+        color: #fff;
+        padding: 1.25rem 1.5rem;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    .form-card-body {
+        padding: 1.75rem 1.5rem;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: .6rem 0;
+        border-bottom: 1px solid #f5f5f5;
+    }
+
+    .info-label {
+        font-size: .85rem;
+        color: #888;
+    }
+
+    .info-value {
+        font-size: .9rem;
+        font-weight: 600;
+        color: #1a1a2e;
+    }
+
+    .status-badge {
+        font-size: .78rem;
+        font-weight: 600;
+        padding: .25rem .75rem;
+        border-radius: 20px;
+    }
+
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .status-approved {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-rejected {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .status-options {
+        display: flex;
+        gap: .75rem;
+    }
+
+    .status-option input {
+        display: none;
+    }
+
+    .status-option-box {
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: .9rem 1.2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: .2s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: .3rem;
+        font-size: .85rem;
+        font-weight: 600;
+        flex: 1;
+    }
+
+        .status-option-box i {
+            font-size: 1.3rem;
+        }
+
+    .status-option input:checked + .pending-box {
+        border-color: #ffc107;
+        background: #fff8e1;
+        color: #856404;
+    }
+
+    .status-option input:checked + .approve-box {
+        border-color: #28a745;
+        background: #e8f5e9;
+        color: #155724;
+    }
+
+    .status-option input:checked + .reject-box {
+        border-color: #dc3545;
+        background: #fde8e8;
+        color: #721c24;
+    }
+
+    .pending-box:hover {
+        border-color: #ffc107;
+    }
+
+    .approve-box:hover {
+        border-color: #28a745;
+    }
+
+    .reject-box:hover {
+        border-color: #dc3545;
+    }
+</style>

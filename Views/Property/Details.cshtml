@@ -1,0 +1,453 @@
+﻿@model Sakany.Models.Property
+@{
+    ViewData["Title"] = "Property Details";
+    var role = Context.Session.GetString("UserRole");
+    var userId = Context.Session.GetString("UserID");
+    bool isInWishlist = ViewBag.IsInWishlist ?? false;
+    bool hasPending = ViewBag.HasPendingRequest ?? false;
+    string? approvedRequestId = ViewBag.ApprovedRequestId as string;
+    bool hasReviewed = ViewBag.HasReviewed ?? false;
+    int pendingCount = ViewBag.PendingRequestCount ?? 0;
+}
+
+<div class="container py-4" style="max-width:960px">
+
+    <!-- BACK -->
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary mb-3">
+        <i class="bi bi-arrow-left me-1"></i>Back to Properties
+    </a>
+
+    <div class="row g-4">
+
+        <!-- LEFT: Image gallery + specs -->
+        <div class="col-lg-7">
+
+            <!-- MAIN IMAGE -->
+            <div class="detail-img-wrap mb-3">
+                @{
+                    var images = Model.Image?.ToList() ?? new List<Sakany.Models.PropertyImage>();
+                    var mainImg = images.FirstOrDefault();
+                }
+                @if (mainImg != null)
+                {
+                    <img src="@mainImg.ImageURL" id="mainImg" class="detail-img" alt="Property" />
+                }
+                else
+                {
+                    <div class="detail-img-placeholder">
+                        <i class="bi bi-buildings"></i>
+                        <p class="mt-2 text-muted small">No images uploaded</p>
+                    </div>
+                }
+
+                <!-- Status ribbon -->
+                <div class="detail-status-ribbon
+                    @(Model.Status == Sakany.Models.PropertyStatus.Available ? "ribbon-green" :
+                                           Model.Status == Sakany.Models.PropertyStatus.Rented ? "ribbon-yellow" : "ribbon-red")">
+                    @Model.Status
+                </div>
+            </div>
+
+            <!-- THUMBNAIL ROW -->
+            @if (images.Count > 1)
+            {
+                <div class="d-flex gap-2 flex-wrap mb-3">
+                    @foreach (var img in images)
+                    {
+                        <img src="@img.ImageURL" class="detail-thumb" onclick="document.getElementById('mainImg').src='@img.ImageURL'" />
+                    }
+                </div>
+            }
+
+            <!-- SPECS GRID -->
+            <div class="detail-specs-grid mb-3">
+                <div class="spec-item">
+                    <i class="bi bi-door-open"></i>
+                    <div class="spec-val">@Model.BedRooms</div>
+                    <div class="spec-lbl">Bedrooms</div>
+                </div>
+                <div class="spec-item">
+                    <i class="bi bi-droplet"></i>
+                    <div class="spec-val">@Model.BathRooms</div>
+                    <div class="spec-lbl">Bathrooms</div>
+                </div>
+                <div class="spec-item">
+                    <i class="bi bi-arrows-fullscreen"></i>
+                    <div class="spec-val">@Model.Area</div>
+                    <div class="spec-lbl">m²</div>
+                </div>
+                <div class="spec-item">
+                    <i class="bi bi-person-check"></i>
+                    <div class="spec-val">@Model.AvailableRooms</div>
+                    <div class="spec-lbl">Available</div>
+                </div>
+            </div>
+
+            <!-- AMENITIES -->
+            @if (Model.PropertyAmenity?.Any() == true)
+            {
+                <div class="detail-card mb-3">
+                    <h6 class="detail-card-title"><i class="bi bi-grid-3x3-gap me-2"></i>Amenities</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var pa in Model.PropertyAmenity)
+                        {
+                            <span class="amenity-pill">
+                                <i class="bi bi-check-circle-fill text-success me-1"></i>@pa.Amenity?.Name
+                            </span>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- REVIEWS -->
+            @if (Model.Reviews?.Any() == true)
+            {
+                <div class="detail-card">
+                    <h6 class="detail-card-title"><i class="bi bi-star me-2"></i>Reviews (@Model.Reviews.Count)</h6>
+                    @foreach (var rv in Model.Reviews.OrderByDescending(r => r.Date).Take(5))
+                    {
+                        <div class="review-item">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="review-avatar">@(rv.Client?.Name?[0].ToString() ?? "?")</div>
+                                    <strong class="small">@rv.Client?.Name</strong>
+                                </div>
+                                <div>
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <i class="bi @(i <= rv.Rate ? "bi-star-fill text-warning" : "bi-star text-muted")" style="font-size:.8rem"></i>
+                                    }
+                                </div>
+                            </div>
+                            <p class="small text-muted mb-0">@rv.Description</p>
+                            <small class="text-muted" style="font-size:.73rem">@rv.Date.ToString("dd MMM yyyy")</small>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- RIGHT: Info + Actions -->
+        <div class="col-lg-5">
+            <div class="detail-info-card">
+
+                <!-- Price & Type -->
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h3 class="detail-price mb-0">EGP @Model.Price.ToString("N0") <span class="detail-per">/mo</span></h3>
+                    <span class="badge bg-light text-dark border">@Model.Type</span>
+                </div>
+
+                <h5 class="mb-1" style="color:#1a1a2e">@Model.Address</h5>
+                <p class="text-muted mb-3">
+                    <i class="bi bi-geo-alt-fill text-danger me-1"></i>@Model.City
+                </p>
+                <hr />
+
+                <!-- Owner info -->
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="detail-owner-avatar">@(Model.Owner?.Name?[0].ToString() ?? "?")</div>
+                    <div>
+                        <div class="small text-muted">Listed by</div>
+                        <div class="fw-600">@Model.Owner?.Name</div>
+                    </div>
+                </div>
+                <hr />
+
+                <!-- Listed date -->
+                <p class="small text-muted mb-3">
+                    <i class="bi bi-calendar3 me-1"></i>Listed on @Model.CreatedAt.ToString("dd MMM yyyy")
+                </p>
+
+                <!-- ════ ROLE-BASED ACTIONS ════ -->
+                @* ── TENANT ACTIONS ── *@
+                @if (role == "Tenant")
+                {
+                    @if (Model.Status == Sakany.Models.PropertyStatus.Available && Model.AvailableRooms > 0)
+                    {
+                        @if (hasPending)
+                        {
+                            <div class="alert alert-warning small py-2 mb-3">
+                                <i class="bi bi-clock me-1"></i>You have a pending request for this property.
+                            </div>
+                        }
+                        else
+                        {
+                            <a asp-controller="Requests" asp-action="Create"
+                               asp-route-propertyId="@Model.ID"
+                               class="btn btn-danger w-100 mb-2">
+                                <i class="bi bi-send me-2"></i>Send Rental Request
+                            </a>
+                        }
+                    }
+                    else
+                    {
+                        <div class="alert alert-secondary small py-2 mb-3">
+                            <i class="bi bi-x-circle me-1"></i>This property is currently @Model.Status.ToString().ToLower().
+                        </div>
+                    }
+
+                    <!-- Wishlist -->
+                    @if (isInWishlist)
+                    {
+                        <a asp-controller="Wishlist" asp-action="Remove" asp-route-propertyId="@Model.ID"
+                           class="btn btn-outline-danger w-100 mb-2">
+                            <i class="bi bi-heart-fill me-2"></i>Remove from Wishlist
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-controller="Wishlist" asp-action="Add" asp-route-propertyId="@Model.ID"
+                           class="btn btn-outline-secondary w-100 mb-2">
+                            <i class="bi bi-heart me-2"></i>Add to Wishlist
+                        </a>
+                    }
+
+                    <!-- Leave Review (only if approved and not yet reviewed) -->
+                    @if (!string.IsNullOrEmpty(approvedRequestId) && !hasReviewed)
+                    {
+                        <a asp-controller="Reviews" asp-action="Create"
+                           asp-route-requestId="@approvedRequestId"
+                           asp-route-propertyId="@Model.ID"
+                           class="btn btn-outline-warning w-100 mb-2">
+                            <i class="bi bi-star me-2"></i>Leave a Review
+                        </a>
+                    }
+                    else if (hasReviewed)
+                    {
+                        <div class="text-center small text-muted mt-1">
+                            <i class="bi bi-check-circle text-success me-1"></i>You have already reviewed this property.
+                        </div>
+                    }
+                }
+
+                @* ── OWNER ACTIONS ── *@
+                @if (role == "Owner" && Model.OwnerID == userId)
+                {
+                    <div class="alert alert-info small py-2 mb-3">
+                        <i class="bi bi-people me-1"></i>
+                        <strong>@pendingCount</strong> pending request(s) for this property.
+                    </div>
+                    <a asp-controller="Requests" asp-action="Index" class="btn btn-outline-primary w-100 mb-2">
+                        <i class="bi bi-file-text me-2"></i>View All Requests
+                    </a>
+                    <a asp-action="Edit" asp-route-id="@Model.ID" class="btn btn-warning w-100 mb-2">
+                        <i class="bi bi-pencil me-2"></i>Edit Property
+                    </a>
+                    <a asp-action="Delete" asp-route-id="@Model.ID" class="btn btn-outline-danger w-100">
+                        <i class="bi bi-trash me-2"></i>Delete Property
+                    </a>
+                }
+
+                @* ── ADMIN ACTIONS ── *@
+                @if (role == "Admin")
+                {
+                    <a asp-action="Edit" asp-route-id="@Model.ID" class="btn btn-warning w-100 mb-2">
+                        <i class="bi bi-pencil me-2"></i>Edit Property
+                    </a>
+                    <a asp-action="Delete" asp-route-id="@Model.ID" class="btn btn-outline-danger w-100">
+                        <i class="bi bi-trash me-2"></i>Delete Property
+                    </a>
+                }
+
+                @* ── GUEST (not logged in) ── *@
+                @if (role == null)
+                {
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-danger w-100">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Login to Request
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .fw-600 {
+        font-weight: 600;
+    }
+
+    .detail-img-wrap {
+        position: relative;
+        border-radius: 14px;
+        overflow: hidden;
+        height: 300px;
+        background: #eee;
+    }
+
+    .detail-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        cursor: pointer;
+        transition: transform .3s;
+    }
+
+        .detail-img:hover {
+            transform: scale(1.02);
+        }
+
+    .detail-img-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: #ccc;
+    }
+
+    .detail-status-ribbon {
+        position: absolute;
+        top: 14px;
+        left: 14px;
+        font-size: .78rem;
+        font-weight: 700;
+        padding: .3rem .8rem;
+        border-radius: 20px;
+    }
+
+    .ribbon-green {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .ribbon-yellow {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .ribbon-red {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .detail-thumb {
+        width: 64px;
+        height: 48px;
+        object-fit: cover;
+        border-radius: 8px;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: .2s;
+    }
+
+        .detail-thumb:hover {
+            border-color: #e74c3c;
+        }
+
+    .detail-specs-grid {
+        display: grid;
+        grid-template-columns: repeat(4,1fr);
+        gap: .5rem;
+    }
+
+    .spec-item {
+        background: #fff;
+        border-radius: 10px;
+        padding: .75rem .5rem;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+        .spec-item i {
+            font-size: 1.2rem;
+            color: #e74c3c;
+            display: block;
+            margin-bottom: .25rem;
+        }
+
+    .spec-val {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #1a1a2e;
+        line-height: 1;
+    }
+
+    .spec-lbl {
+        font-size: .7rem;
+        color: #888;
+        margin-top: .15rem;
+    }
+
+    .detail-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1rem 1.1rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .detail-card-title {
+        font-weight: 700;
+        color: #1a1a2e;
+        border-left: 3px solid #e74c3c;
+        padding-left: .75rem;
+        margin-bottom: .75rem;
+    }
+
+    .amenity-pill {
+        background: #f8f9fa;
+        color: #444;
+        font-size: .8rem;
+        padding: .25rem .7rem;
+        border-radius: 20px;
+        border: 1px solid #e9ecef;
+    }
+
+    .review-item {
+        border-bottom: 1px solid #f0f0f0;
+        padding: .75rem 0;
+    }
+
+        .review-item:last-child {
+            border-bottom: none;
+        }
+
+    .review-avatar {
+        width: 28px;
+        height: 28px;
+        background: #e74c3c;
+        border-radius: 50%;
+        color: #fff;
+        font-size: .75rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .detail-info-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        position: sticky;
+        top: 80px;
+    }
+
+    .detail-price {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #1a1a2e;
+    }
+
+    .detail-per {
+        font-size: .85rem;
+        font-weight: 400;
+        color: #888;
+    }
+
+    .detail-owner-avatar {
+        width: 40px;
+        height: 40px;
+        background: #e74c3c;
+        border-radius: 50%;
+        color: #fff;
+        font-weight: 700;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+</style>

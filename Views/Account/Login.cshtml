@@ -1,0 +1,111 @@
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="auth-brand">
+            <a asp-controller="Home" asp-action="Index" class="text-decoration-none">
+                <span style="color:#e74c3c;font-weight:800;font-size:1.8rem;">Sak<span style="color:#1a1a2e">any</span></span>
+            </a>
+        </div>
+
+        <h4 class="auth-title">Welcome back</h4>
+        <p class="auth-subtitle">Sign in to your account</p>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger small py-2">
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <div>@error.ErrorMessage</div>
+                }
+            </div>
+        }
+
+        <form asp-controller="Account" asp-action="Login" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+
+            <div class="mb-3">
+                <label class="form-label fw-600">Email</label>
+                <div class="input-icon-wrap">
+                    <i class="bi bi-envelope input-icon"></i>
+                    <input type="email" name="email" class="form-control auth-input"
+                           placeholder="your@email.com" required autocomplete="email" />
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-600">Password</label>
+                <div class="input-icon-wrap">
+                    <i class="bi bi-lock input-icon"></i>
+                    <input type="password" name="password" class="form-control auth-input"
+                           placeholder="••••••••" required autocomplete="current-password" />
+                </div>
+            </div>
+
+            <button type="submit" class="btn auth-btn w-100 mb-3">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+            </button>
+        </form>
+
+        <p class="text-center text-muted small mb-0">
+            Don't have an account?
+            <a asp-controller="Account" asp-action="Register" class="text-danger fw-600">Sign up free</a>
+        </p>
+    </div>
+</div>
+
+<style>
+    .auth-page {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 2rem 1rem;
+    }
+    .auth-card {
+        background: #fff;
+        border-radius: 20px;
+        padding: 2.5rem;
+        width: 100%;
+        max-width: 440px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+    .auth-brand { text-align: center; margin-bottom: 1.5rem; }
+    .auth-title { font-weight: 800; color: #1a1a2e; text-align: center; margin-bottom: 0.25rem; }
+    .auth-subtitle { color: #888; text-align: center; margin-bottom: 1.5rem; font-size: 0.9rem; }
+    .input-icon-wrap { position: relative; }
+    .input-icon {
+        position: absolute; left: 12px; top: 50%;
+        transform: translateY(-50%); color: #aaa; z-index: 5;
+    }
+    .auth-input {
+        padding-left: 2.4rem;
+        border-radius: 10px;
+        border: 1.5px solid #e9ecef;
+        height: 46px;
+    }
+    .auth-input:focus {
+        border-color: #e74c3c;
+        box-shadow: 0 0 0 0.2rem rgba(231,76,60,0.12);
+    }
+    .auth-btn {
+        background: #e74c3c;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        height: 46px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+    }
+    .auth-btn:hover {
+        background: #c0392b;
+        color: #fff;
+        transform: translateY(-1px);
+    }
+    .fw-600 { font-weight: 600; }
+</style>

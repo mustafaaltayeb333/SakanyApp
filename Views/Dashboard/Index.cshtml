@@ -1,0 +1,337 @@
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="container py-4">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-800 mb-1" style="font-weight:800;color:#1a1a2e">
+                <i class="bi bi-speedometer2 me-2 text-danger"></i>Dashboard
+            </h2>
+            <p class="text-muted mb-0">Welcome back, @Context.Session.GetString("UserName") — here's what's happening.</p>
+        </div>
+        <span class="badge bg-danger px-3 py-2">
+            <i class="bi bi-shield-check me-1"></i>Admin Panel
+        </span>
+    </div>
+
+    <!-- ── MAIN STATS ROW ── -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="dash-stat-card" style="border-left: 4px solid #e74c3c;">
+                <div class="dash-stat-icon text-danger"><i class="bi bi-buildings"></i></div>
+                <div class="dash-stat-number">@ViewBag.PropertiesCount</div>
+                <div class="dash-stat-label">Total Properties</div>
+                <div class="dash-stat-sub">
+                    <span class="text-success">@ViewBag.AvailableProperties available</span> ·
+                    <span class="text-warning">@ViewBag.RentedProperties rented</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="dash-stat-card" style="border-left: 4px solid #3498db;">
+                <div class="dash-stat-icon text-primary"><i class="bi bi-people"></i></div>
+                <div class="dash-stat-number">@ViewBag.UsersCount</div>
+                <div class="dash-stat-label">Total Users</div>
+                <div class="dash-stat-sub">
+                    <span>@ViewBag.OwnerCount owners</span> ·
+                    <span>@ViewBag.TenantCount tenants</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="dash-stat-card" style="border-left: 4px solid #f39c12;">
+                <div class="dash-stat-icon text-warning"><i class="bi bi-file-text"></i></div>
+                <div class="dash-stat-number">@ViewBag.RequestsCount</div>
+                <div class="dash-stat-label">Requests</div>
+                <div class="dash-stat-sub">
+                    <span class="text-warning">@ViewBag.PendingRequests pending</span> ·
+                    <span class="text-success">@ViewBag.ApprovedRequests approved</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="dash-stat-card" style="border-left: 4px solid #2ecc71;">
+                <div class="dash-stat-icon text-success"><i class="bi bi-star"></i></div>
+                <div class="dash-stat-number">@ViewBag.ReviewsCount</div>
+                <div class="dash-stat-label">Reviews</div>
+                <div class="dash-stat-sub">Avg Rating: <strong>@ViewBag.AvgRating ⭐</strong></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECOND STATS ROW -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="dash-stat-card" style="border-left: 4px solid #9b59b6;">
+                <div class="dash-stat-icon" style="color:#9b59b6"><i class="bi bi-file-earmark-text"></i></div>
+                <div class="dash-stat-number">@ViewBag.ContractsCount</div>
+                <div class="dash-stat-label">Contracts</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="dash-stat-card" style="border-left: 4px solid #e74c3c;">
+                <div class="dash-stat-icon text-danger"><i class="bi bi-flag"></i></div>
+                <div class="dash-stat-number">@ViewBag.ReportsCount</div>
+                <div class="dash-stat-label">Reports</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="dash-stat-card" style="border-left: 4px solid #1abc9c;">
+                <div class="dash-stat-icon" style="color:#1abc9c"><i class="bi bi-person-badge"></i></div>
+                <div class="dash-stat-number">@ViewBag.AdminCount</div>
+                <div class="dash-stat-label">Admins</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="dash-stat-card" style="border-left: 4px solid #e67e22;">
+                <div class="dash-stat-icon" style="color:#e67e22"><i class="bi bi-house-check"></i></div>
+                <div class="dash-stat-number">@ViewBag.AvailableProperties</div>
+                <div class="dash-stat-label">Available Now</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── QUICK LINKS ── -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <h5 class="fw-600 mb-3" style="font-weight:700">Quick Actions</h5>
+        </div>
+        <div class="col-6 col-md-2">
+            <a asp-controller="User" asp-action="Index" class="dash-quick-link">
+                <i class="bi bi-people"></i>
+                <span>Users</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-2">
+            <a asp-controller="Property" asp-action="Index" class="dash-quick-link">
+                <i class="bi bi-buildings"></i>
+                <span>Properties</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-2">
+            <a asp-controller="Requests" asp-action="Index" class="dash-quick-link">
+                <i class="bi bi-file-text"></i>
+                <span>Requests</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-2">
+            <a asp-controller="Contract" asp-action="Index" class="dash-quick-link">
+                <i class="bi bi-file-earmark-text"></i>
+                <span>Contracts</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-2">
+            <a asp-controller="Reports" asp-action="Index" class="dash-quick-link">
+                <i class="bi bi-flag"></i>
+                <span>Reports</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-2">
+            <a asp-controller="Amenity" asp-action="Index" class="dash-quick-link">
+                <i class="bi bi-grid-3x3-gap"></i>
+                <span>Amenities</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- ── TABLES ROW ── -->
+    <div class="row g-4">
+
+        <!-- Recent Requests -->
+        <div class="col-lg-6">
+            <div class="dash-table-card">
+                <div class="dash-table-header">
+                    <h6><i class="bi bi-file-text me-2"></i>Recent Requests</h6>
+                    <a asp-controller="Requests" asp-action="Index" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Client</th>
+                                <th>Property</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (ViewBag.RecentRequests is List<Sakany.Models.Request> requests)
+                            {
+                                @foreach (var r in requests)
+                                {
+                                    <tr>
+                                        <td class="small">@r.Client?.Name</td>
+                                        <td class="small text-truncate" style="max-width:120px">@r.Property?.Address</td>
+                                        <td>
+                                            <span class="badge @(r.Status == Sakany.Models.RequestStatus.Pending ? "bg-warning text-dark" : r.Status == Sakany.Models.RequestStatus.Approved ? "bg-success" : "bg-danger")">
+                                                @r.Status
+                                            </span>
+                                        </td>
+                                        <td class="small text-muted">@r.Date.ToString("dd MMM")</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Properties -->
+        <div class="col-lg-6">
+            <div class="dash-table-card">
+                <div class="dash-table-header">
+                    <h6><i class="bi bi-buildings me-2"></i>Recent Properties</h6>
+                    <a asp-controller="Property" asp-action="Index" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Address</th>
+                                <th>City</th>
+                                <th>Price</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (ViewBag.RecentProperties is List<Sakany.Models.Property> props)
+                            {
+                                @foreach (var p in props)
+                                {
+                                    <tr>
+                                        <td class="small text-truncate" style="max-width:120px">@p.Address</td>
+                                        <td class="small">@p.City</td>
+                                        <td class="small fw-bold">@p.Price.ToString("N0")</td>
+                                        <td>
+                                            <span class="badge @(p.Status == Sakany.Models.PropertyStatus.Available ? "bg-success" : p.Status == Sakany.Models.PropertyStatus.Rented ? "bg-warning text-dark" : "bg-secondary")">
+                                                @p.Status
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Reports -->
+        @if (ViewBag.RecentReports is List<Sakany.Models.Report> reports2 && reports2.Any())
+        {
+            <div class="col-12">
+                <div class="dash-table-card">
+                    <div class="dash-table-header">
+                        <h6><i class="bi bi-flag me-2 text-danger"></i>Recent Reports</h6>
+                        <a asp-controller="Reports" asp-action="Index" class="btn btn-sm btn-outline-danger">View All</a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Reporter</th>
+                                    <th>Property</th>
+                                    <th>Reason</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var rep in reports2)
+                                {
+                                    <tr>
+                                        <td class="small">@rep.Reporter?.Name</td>
+                                        <td class="small">@rep.Property?.Address</td>
+                                        <td class="small">@rep.Reason</td>
+                                        <td class="small text-muted">@rep.CreatedAt.ToString("dd MMM yyyy")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .dash-stat-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.25rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        position: relative;
+    }
+    .dash-stat-icon {
+        font-size: 1.6rem;
+        margin-bottom: 0.5rem;
+    }
+    .dash-stat-number {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #1a1a2e;
+        line-height: 1;
+    }
+    .dash-stat-label {
+        font-size: 0.82rem;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 0.2rem;
+    }
+    .dash-stat-sub {
+        font-size: 0.75rem;
+        color: #999;
+        margin-top: 0.4rem;
+    }
+
+    .dash-quick-link {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1.2rem 0.5rem;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        text-decoration: none;
+        color: #444;
+        font-size: 0.82rem;
+        font-weight: 600;
+        transition: all 0.2s;
+        gap: 0.5rem;
+    }
+    .dash-quick-link i {
+        font-size: 1.5rem;
+        color: var(--sakany-primary);
+    }
+    .dash-quick-link:hover {
+        background: #fef2f2;
+        color: var(--sakany-primary);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(231,76,60,0.12);
+    }
+
+    .dash-table-card {
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .dash-table-header {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .dash-table-header h6 {
+        margin: 0;
+        font-weight: 700;
+        color: #1a1a2e;
+    }
+</style>

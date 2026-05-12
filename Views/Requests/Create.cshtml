@@ -1,0 +1,86 @@
+﻿@model Sakany.Models.Request
+@{
+    ViewData["Title"] = "New Rental Request";
+}
+
+<div class="container py-4" style="max-width:560px">
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary mb-3">
+        <i class="bi bi-arrow-left me-1"></i>Back
+    </a>
+
+    <div class="form-card">
+        <div class="form-card-header">
+            <i class="bi bi-send me-2"></i>Submit a Rental Request
+        </div>
+        <div class="form-card-body">
+            <p class="text-muted small mb-4">
+                Choose an available property below. The owner will review your request and respond.
+            </p>
+
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger small py-2"></div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-600">
+                        <i class="bi bi-buildings me-1 text-danger"></i>Select Property
+                    </label>
+                    <select asp-for="PropertyID" asp-items="@(ViewData["PropertyID"] as SelectList)"
+                            class="form-select">
+                        <option value="">— Choose a property —</option>
+                    </select>
+                    <span asp-validation-for="PropertyID" class="text-danger small"></span>
+                </div>
+
+                <div class="alert alert-light border small">
+                    <i class="bi bi-info-circle text-primary me-1"></i>
+                    Only <strong>Available</strong> properties with open rooms are shown.
+                    You can only have one pending request per property.
+                </div>
+
+                <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="btn btn-danger px-4">
+                        <i class="bi bi-send me-2"></i>Submit Request
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .fw-600 {
+        font-weight: 600;
+    }
+
+    .form-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+    .form-card-header {
+        background: linear-gradient(135deg,#1a1a2e,#0f3460);
+        color: #fff;
+        padding: 1.25rem 1.5rem;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    .form-card-body {
+        padding: 1.75rem 1.5rem;
+    }
+
+    .form-select:focus {
+        border-color: #e74c3c;
+        box-shadow: 0 0 0 .2rem rgba(231,76,60,.12);
+    }
+</style>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

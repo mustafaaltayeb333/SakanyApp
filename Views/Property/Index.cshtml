@@ -1,0 +1,603 @@
+﻿@model List<Sakany.Models.Property>
+@{
+    ViewData["Title"] = "Properties";
+    var role = Context.Session.GetString("UserRole");
+    var userId = Context.Session.GetString("UserID");
+    var wishlistIds = ViewBag.WishlistIds as List<string> ?? new List<string>();
+
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int totalCount = ViewBag.TotalCount ?? 0;
+
+    // Helper: build query string keeping all current filters + new page number
+    string PageUrl(int page)
+    {
+        var qs = new System.Text.StringBuilder("?pageNumber=").Append(page);
+        if (!string.IsNullOrEmpty(ViewBag.CurrentCity as string)) qs.Append("&city=").Append(Uri.EscapeDataString(ViewBag.CurrentCity));
+        if (!string.IsNullOrEmpty(ViewBag.CurrentType as string)) qs.Append("&type=").Append(Uri.EscapeDataString(ViewBag.CurrentType));
+        if (!string.IsNullOrEmpty(ViewBag.CurrentStatus as string)) qs.Append("&status=").Append(Uri.EscapeDataString(ViewBag.CurrentStatus));
+        if (ViewBag.CurrentMinPrice != null) qs.Append("&minPrice=").Append(ViewBag.CurrentMinPrice);
+        if (ViewBag.CurrentMaxPrice != null) qs.Append("&maxPrice=").Append(ViewBag.CurrentMaxPrice);
+        return qs.ToString();
+    }
+}
+
+<div class="container py-4">
+
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1" style="color:#1a1a2e">
+                @if (role == "Owner")
+                {
+                    <text><i class="bi bi-buildings me-2 text-danger"></i>My Properties</text>
+                }
+                else if (role == "Admin")
+                {
+                    <text><i class="bi bi-buildings me-2 text-danger"></i>All Properties</text>
+                }
+                else
+                {
+                    <text><i class="bi bi-search me-2 text-danger"></i>Find a Property</text>
+                }
+            </h2>
+            <p class="text-muted mb-0">@totalCount properties found</p>
+        </div>
+        @if (role == "Owner" || role == "Admin")
+        {
+            <a asp-action="Create" class="btn btn-danger px-4">
+                <i class="bi bi-plus-lg me-2"></i>List Property
+            </a>
+        }
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filter-bar mb-4">
+        <form asp-action="Index" method="get">
+            <div class="row g-2 align-items-end">
+                <div class="col-6 col-md-2">
+                    <label class="filter-label">City</label>
+                    <select name="city" class="form-select form-select-sm">
+                        <option value="">All Cities</option>
+                        @foreach (var c in ViewBag.Cities)
+                        {
+                            <option value="@c" selected="@(c == ViewBag.CurrentCity ? "selected" : null)">@c</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="filter-label">Type</label>
+                    <select name="type" class="form-select form-select-sm">
+                        <option value="">Any Type</option>
+                        @foreach (var t in ViewBag.Types)
+                        {
+                            <option value="@t" selected="@(t == ViewBag.CurrentType ? "selected" : null)">@t</option>
+                        }
+                    </select>
+                </div>
+                @if (role == "Admin")
+                {
+                    <div class="col-6 col-md-2">
+                        <label class="filter-label">Status</label>
+                        <select name="status" class="form-select form-select-sm">
+                            <option value="">Any Status</option>
+                            @foreach (var s in ViewBag.Statuses)
+                            {
+                                <option value="@s" selected="@(s == ViewBag.CurrentStatus ? "selected" : null)">@s</option>
+                            }
+                        </select>
+                    </div>
+                }
+                <div class="col-6 col-md-2">
+                    <label class="filter-label">Min Price</label>
+                    <input type="number" name="minPrice" class="form-control form-control-sm"
+                           placeholder="0" value="@ViewBag.CurrentMinPrice" />
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="filter-label">Max Price</label>
+                    <input type="number" name="maxPrice" class="form-control form-control-sm"
+                           placeholder="Any" value="@ViewBag.CurrentMaxPrice" />
+                </div>
+                <div class="col-6 col-md-2">
+                    <button type="submit" class="btn btn-danger btn-sm w-100">
+                        <i class="bi bi-search me-1"></i>Filter
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- PROPERTY CARDS -->
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-buildings display-1 text-muted opacity-25"></i>
+            <p class="mt-3 text-muted fs-5">No properties found.</p>
+            @if (role == "Owner")
+            {
+                <a asp-action="Create" class="btn btn-danger px-4">List Your First Property</a>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var item in Model)
+            {
+                <div class="col-xl-4 col-md-6">
+                    <div class="prop-card">
+
+                        <!-- IMAGE -->
+                        <div class="prop-img-wrap">
+                            @{
+                                var img = item.Image?.FirstOrDefault();
+                            }
+                            @if (img != null)
+                            {
+                                <img src="@img.ImageURL" class="prop-img" alt="property" />
+                            }
+                            else
+                            {
+                                <div class="prop-img-placeholder">
+                                    <i class="bi bi-buildings"></i>
+                                </div>
+                            }
+
+                            <!-- Type badge -->
+                            <span class="prop-type-badge">@item.Type</span>
+
+                            <!-- Status badge -->
+                            <span class="prop-status-badge
+                                        @(item.Status == Sakany.Models.PropertyStatus.Available ? "badge-avail" :
+                                          item.Status == Sakany.Models.PropertyStatus.Rented    ? "badge-rented" : "badge-sold")">
+                                @item.Status
+                            </span>
+
+                            <!-- Wishlist button (Tenant only) -->
+                            @if (role == "Tenant")
+                            {
+                                var inWishlist = wishlistIds.Contains(item.ID);
+                                <a asp-controller="Wishlist"
+                                   asp-action="@(inWishlist ? "Remove" : "Add")"
+                                   asp-route-propertyId="@item.ID"
+                                   class="prop-heart @(inWishlist ? "hearted" : "")"
+                                   title="@(inWishlist ? "Remove from wishlist" : "Add to wishlist")">
+                                    <i class="bi @(inWishlist ? "bi-heart-fill" : "bi-heart")"></i>
+                                </a>
+                            }
+                        </div>
+
+                        <!-- BODY -->
+                        <div class="prop-body">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <h5 class="prop-price mb-0">
+                                    EGP @item.Price.ToString("N0")
+                                    <span class="prop-per">/mo</span>
+                                </h5>
+                            </div>
+
+                            <p class="prop-address">
+                                <i class="bi bi-geo-alt-fill text-danger me-1"></i>@item.Address
+                            </p>
+                            <p class="text-muted small mb-3">
+                                <i class="bi bi-map me-1"></i>@item.City
+                                @if (role != "Tenant")
+                                {
+                                    <span class="ms-2 text-muted">· Owner: <strong>@item.Owner?.Name</strong></span>
+                                }
+                            </p>
+
+                            <!-- Specs -->
+                            <div class="prop-specs">
+                                <span><i class="bi bi-door-open"></i> @item.BedRooms bd</span>
+                                <span><i class="bi bi-droplet"></i> @item.BathRooms ba</span>
+                                <span><i class="bi bi-arrows-fullscreen"></i> @item.Area m²</span>
+                                <span><i class="bi bi-person-check"></i> @item.AvailableRooms avail</span>
+                            </div>
+
+                            <!-- Amenities (small) -->
+                            @if (item.PropertyAmenity?.Any() == true)
+                            {
+                                <div class="prop-amenities">
+                                    @foreach (var pa in item.PropertyAmenity.Take(3))
+                                    {
+                                        <span class="amenity-tag">@pa.Amenity?.Name</span>
+                                    }
+                                    @if (item.PropertyAmenity.Count > 3)
+                                    {
+                                        <span class="amenity-tag">+@(item.PropertyAmenity.Count - 3) more</span>
+                                    }
+                                </div>
+                            }
+
+                            <!-- ACTIONS -->
+                            <div class="prop-actions mt-3">
+                                <a asp-action="Details" asp-route-id="@item.ID"
+                                   class="btn btn-sm btn-outline-secondary flex-fill">
+                                    <i class="bi bi-eye me-1"></i>Details
+                                </a>
+
+                                @if (role == "Tenant")
+                                {
+                                    @if (item.Status == Sakany.Models.PropertyStatus.Available && item.AvailableRooms > 0)
+                                    {
+                                        <a asp-controller="Requests" asp-action="Create"
+                                           asp-route-propertyId="@item.ID"
+                                           class="btn btn-sm btn-danger flex-fill">
+                                            <i class="bi bi-send me-1"></i>Request
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="btn btn-sm btn-secondary flex-fill disabled">Unavailable</span>
+                                    }
+                                }
+
+                                @if (role == "Owner" && item.OwnerID == userId)
+                                {
+                                    <a asp-action="Edit" asp-route-id="@item.ID"
+                                       class="btn btn-sm btn-warning flex-fill">
+                                        <i class="bi bi-pencil me-1"></i>Edit
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.ID"
+                                       class="btn btn-sm btn-outline-danger flex-fill">
+                                        <i class="bi bi-trash me-1"></i>Delete
+                                    </a>
+                                }
+
+                                @if (role == "Admin")
+                                {
+                                    <a asp-action="Edit" asp-route-id="@item.ID"
+                                       class="btn btn-sm btn-warning flex-fill">
+                                        <i class="bi bi-pencil me-1"></i>Edit
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.ID"
+                                       class="btn btn-sm btn-outline-danger flex-fill">
+                                        <i class="bi bi-trash me-1"></i>
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- ── PAGINATION ────────────────────────────────── -->
+        @if (totalPages > 1)
+        {
+            <nav class="mt-5 d-flex justify-content-center align-items-center gap-2" aria-label="Property pages">
+
+                
+                @if (currentPage > 1)
+                {
+                    <a href="@PageUrl(currentPage - 1)" class="page-btn page-btn-arrow" title="Previous">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                }
+                else
+                {
+                    <span class="page-btn page-btn-arrow disabled">
+                        <i class="bi bi-chevron-left"></i>
+                    </span>
+                }
+
+                
+                @{
+                    int startPage = Math.Max(1, currentPage - 2);
+                    int endPage = Math.Min(totalPages, currentPage + 2);
+                }
+
+                @if (startPage > 1)
+                {
+                    <a href="@PageUrl(1)" class="page-btn">1</a>
+                    @if (startPage > 2)
+                    {
+                        <span class="page-dots">…</span>
+                    }
+                }
+
+                @for (int p = startPage; p <= endPage; p++)
+                {
+                    @if (p == currentPage)
+                    {
+                        <span class="page-btn page-btn-active">@p</span>
+                    }
+                    else
+                    {
+                        <a href="@PageUrl(p)" class="page-btn">@p</a>
+                    }
+                }
+
+                @if (endPage < totalPages)
+                {
+                    @if (endPage < totalPages - 1)
+                    {
+                        <span class="page-dots">…</span>
+                    }
+                    <a href="@PageUrl(totalPages)" class="page-btn">@totalPages</a>
+                }
+
+                
+                @if (currentPage < totalPages)
+                {
+                    <a href="@PageUrl(currentPage + 1)" class="page-btn page-btn-arrow" title="Next">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                }
+                else
+                {
+                    <span class="page-btn page-btn-arrow disabled">
+                        <i class="bi bi-chevron-right"></i>
+                    </span>
+                }
+
+            </nav>
+
+            <!-- Page info -->
+            <p class="text-center text-muted small mt-2">
+                Page @currentPage of @totalPages &nbsp;·&nbsp; @totalCount properties total
+            </p>
+        }
+    }
+</div>
+
+<style>
+    /* ── FILTER BAR ─────────────────────────────────── */
+    .filter-bar {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .filter-label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    /* ── PROPERTY CARD ──────────────────────────────── */
+    .prop-card {
+        background: #fff;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+        transition: all .3s;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .prop-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 36px rgba(0,0,0,0.13);
+        }
+
+    .prop-img-wrap {
+        position: relative;
+        height: 195px;
+        overflow: hidden;
+        background: #eee;
+        flex-shrink: 0;
+    }
+
+    .prop-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform .4s;
+    }
+
+    .prop-card:hover .prop-img {
+        transform: scale(1.05);
+    }
+
+    .prop-img-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: #ccc;
+        background: linear-gradient(135deg,#f8f9fa,#e9ecef);
+    }
+
+    .prop-type-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: rgba(255,255,255,.95);
+        color: #e74c3c;
+        font-size: .72rem;
+        font-weight: 700;
+        padding: .2rem .65rem;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+    }
+
+    .prop-status-badge {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        font-size: .72rem;
+        font-weight: 600;
+        padding: .2rem .65rem;
+        border-radius: 20px;
+    }
+
+    .badge-avail {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .badge-rented {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .badge-sold {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .prop-heart {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 32px;
+        height: 32px;
+        background: rgba(255,255,255,.9);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ccc;
+        text-decoration: none;
+        transition: all .2s;
+        font-size: .95rem;
+    }
+
+        .prop-heart:hover, .prop-heart.hearted {
+            background: #fff;
+            color: #e74c3c;
+        }
+
+    .prop-body {
+        padding: 1rem 1.1rem;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+
+    .prop-price {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #1a1a2e;
+    }
+
+    .prop-per {
+        font-size: .72rem;
+        font-weight: 400;
+        color: #888;
+    }
+
+    .prop-address {
+        font-size: .85rem;
+        font-weight: 500;
+        color: #333;
+        margin-bottom: .2rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .prop-specs {
+        display: flex;
+        gap: .6rem;
+        flex-wrap: wrap;
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: .45rem .7rem;
+    }
+
+        .prop-specs span {
+            font-size: .76rem;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: .25rem;
+        }
+
+        .prop-specs i {
+            color: #e74c3c;
+            font-size: .78rem;
+        }
+
+    .prop-amenities {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .35rem;
+        margin-top: .6rem;
+    }
+
+    .amenity-tag {
+        background: #f0f0f0;
+        color: #555;
+        font-size: .72rem;
+        padding: .15rem .55rem;
+        border-radius: 20px;
+    }
+
+    .prop-actions {
+        display: flex;
+        gap: .4rem;
+        flex-wrap: wrap;
+        margin-top: auto;
+    }
+
+        .prop-actions .btn {
+            font-size: .8rem;
+        }
+
+    /* ── PAGINATION ─────────────────────────────────── */
+    .page-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 38px;
+        height: 38px;
+        padding: 0 .6rem;
+        border-radius: 8px;
+        font-size: .875rem;
+        font-weight: 500;
+        color: #444;
+        background: #fff;
+        border: 1px solid #dee2e6;
+        text-decoration: none;
+        transition: all .2s;
+        cursor: pointer;
+    }
+
+        .page-btn:hover:not(.disabled):not(.page-btn-active) {
+            background: #f8f9fa;
+            border-color: #e74c3c;
+            color: #e74c3c;
+        }
+
+    .page-btn-active {
+        background: #e74c3c;
+        border-color: #e74c3c;
+        color: #fff !important;
+        font-weight: 700;
+        cursor: default;
+        pointer-events: none;
+    }
+
+    .page-btn-arrow {
+        color: #555;
+    }
+
+    .page-btn.disabled {
+        opacity: .4;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .page-dots {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 28px;
+        height: 38px;
+        color: #aaa;
+        font-size: .85rem;
+        user-select: none;
+    }
+</style>
