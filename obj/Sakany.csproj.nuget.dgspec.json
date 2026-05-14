@@ -1,26 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "/Users/mustafaaltayeb/university/WDT/Final/Sakany/Sakany/Sakany.csproj": {}
+    "E:\\IT 230\\Level 3\\2nd term\\WDT Project\\Projects\\SakanyApp\\Sakany.csproj": {}
   },
   "projects": {
-    "/Users/mustafaaltayeb/university/WDT/Final/Sakany/Sakany/Sakany.csproj": {
+    "E:\\IT 230\\Level 3\\2nd term\\WDT Project\\Projects\\SakanyApp\\Sakany.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/mustafaaltayeb/university/WDT/Final/Sakany/Sakany/Sakany.csproj",
+        "projectUniqueName": "E:\\IT 230\\Level 3\\2nd term\\WDT Project\\Projects\\SakanyApp\\Sakany.csproj",
         "projectName": "Sakany",
-        "projectPath": "/Users/mustafaaltayeb/university/WDT/Final/Sakany/Sakany/Sakany.csproj",
-        "packagesPath": "/Users/mustafaaltayeb/.nuget/packages/",
-        "outputPath": "/Users/mustafaaltayeb/university/WDT/Final/Sakany/Sakany/obj/",
+        "projectPath": "E:\\IT 230\\Level 3\\2nd term\\WDT Project\\Projects\\SakanyApp\\Sakany.csproj",
+        "packagesPath": "C:\\Users\\BR\\.nuget\\packages\\",
+        "outputPath": "E:\\IT 230\\Level 3\\2nd term\\WDT Project\\Projects\\SakanyApp\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/mustafaaltayeb/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\BR\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "/usr/local/share/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -33,6 +32,11 @@
           "warnAsError": [
             "NU1605"
           ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
         }
       },
       "frameworks": {
@@ -95,7 +99,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.420/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.420/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

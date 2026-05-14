@@ -22,7 +22,7 @@ namespace Sakany
 			string connectionString = builder.Configuration.GetConnectionString(activeConnectionName);
 			
 			
-           builder.Services.AddDbContext<ApplicationDbContext>(options =>
+           builder.Services.AddDbContext<SakanyDbContext>(options =>
 				options.UseSqlServer(connectionString));
 
             // ── SESSION ───────────────────────────────────
