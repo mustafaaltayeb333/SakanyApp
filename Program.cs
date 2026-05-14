@@ -16,9 +16,14 @@ namespace Sakany
             builder.Services.AddControllersWithViews();
 
             // ── DATABASE ──────────────────────────────────
-            builder.Services.AddDbContext<SakanyDbContext>(options =>
-                options.UseSqlServer(
-                    builder.Configuration.GetConnectionString("DefaultConnection")));
+			
+			string activeConnectionName = builder.Configuration["ActiveConnection"];
+			
+			string connectionString = builder.Configuration.GetConnectionString(activeConnectionName);
+			
+			
+           builder.Services.AddDbContext<ApplicationDbContext>(options =>
+				options.UseSqlServer(connectionString));
 
             // ── SESSION ───────────────────────────────────
             builder.Services.AddDistributedMemoryCache();
