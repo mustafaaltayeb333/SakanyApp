@@ -14,6 +14,11 @@ namespace Sakany.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // ==========================================
+            // 1. ENTITY CONFIGURATIONS & RELATIONSHIPS
+            // ==========================================
+
+
             //Avaliable rooms constraint => avl <= rooms
             modelBuilder.Entity<Property>(entity =>
             {
@@ -183,7 +188,69 @@ namespace Sakany.Data
                 .HasFilter("[Status] = 0")
                 .IsUnique();
 
+            // ==========================================
+            // 2. DATA SEEDING (HasData)
+            // ==========================================
+
+            // 1. Seed Users (Owners)
+            modelBuilder.Entity<User>().HasData(
+                new User { ID = "O1", Name = "Ahmed Owner", Email = "ahmed@example.com", Password = "hashed_pass", Phone = "01012345678", Role = (UserRole)1 },
+                new User { ID = "O2", Name = "Sara Owner", Email = "sara@example.com", Password = "hashed_pass", Phone = "01012345679", Role = (UserRole)1 },
+                new User { ID = "O3", Name = "Mona Owner", Email = "mona@example.com", Password = "hashed_pass", Phone = "01012345680", Role = (UserRole)1 },
+                new User { ID = "O4", Name = "Omar Owner", Email = "omar@example.com", Password = "hashed_pass", Phone = "01012345681", Role = (UserRole)1 },
+                new User { ID = "O5", Name = "Zain Owner", Email = "zain@example.com", Password = "hashed_pass", Phone = "01012345682", Role = (UserRole)1 }
+            );
+
+            // 2. Setup lists and generators for Properties
+            var properties = new List<Property>();
+            var propertyImages = new List<PropertyImage>();
+    
+            // Fixed seed guarantees the same random data for both you and your teammate
+            var random = new Random(123); 
+            var cities = new[] { "Cairo", "Alexandria", "Giza", "New Cairo", "Heliopolis", "6th October", "Mansoura", "Tanta", "Ismailia", "Sheikh Zayed" };
+            
+            // Fixed date prevents infinite pending EF migrations
+            var fixedDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc); 
+
+        // 3. Generate 1000 Properties and Images
+        for (int i = 1; i <= 1000; i++)
+        {
+            string propertyId = $"P{i}";
+            string ownerId = $"O{random.Next(1, 6)}"; // O1 to O5
+            string city = cities[random.Next(cities.Length)];
+            int rooms = random.Next(1, 7); // 1 to 6
+			string imageUrl = $"https://loremflickr.com/800/600/house,realestate?lock={i}";
+            
+            properties.Add(new Property
+            {
+                ID = propertyId,
+                OwnerID = ownerId, // Make sure this matches your User foreign key name
+                City = city,
+                Address = $"{city} District {i}",
+                Type = (Sakany.Models.PropertyType)random.Next(0, 6),
+				Status = (Sakany.Models.PropertyStatus)random.Next(0, 3),
+                AvailableRooms = rooms,
+                BedRooms = rooms,
+                BathRooms = random.Next(1, 6), // 1 to 5
+                Area = random.Next(50, 750), // 50 to 749
+                CreatedAt = fixedDate 
+            });
+
+			propertyImages.Add(new PropertyImage
+            {
+                ID = $"IMG{i}",
+                PropertyID = propertyId, // Foreign key to Property
+                ImageURL = imageUrl,
+                UploadDate = fixedDate
+            });
+    }
+
+    // 4. Inject into EF Core
+    modelBuilder.Entity<Property>().HasData(properties);
+    modelBuilder.Entity<PropertyImage>().HasData(propertyImages);
+
         }
+
         public DbSet<User> User { get; set; }
         public DbSet<Property> Property { get; set; }
         public DbSet<PropertyImage> PropertyImage { get; set; }
