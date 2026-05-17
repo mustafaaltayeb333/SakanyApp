@@ -1,31 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Eldab\\SakanyApp\\Sakany.csproj": {}
+    "E:\\IT 230\\Level 3\\2nd term\\WDT Project\\Projects\\SakanyApp\\Sakany.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Eldab\\SakanyApp\\Sakany.csproj": {
+    "E:\\IT 230\\Level 3\\2nd term\\WDT Project\\Projects\\SakanyApp\\Sakany.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Eldab\\SakanyApp\\Sakany.csproj",
+        "projectUniqueName": "E:\\IT 230\\Level 3\\2nd term\\WDT Project\\Projects\\SakanyApp\\Sakany.csproj",
         "projectName": "Sakany",
-        "projectPath": "C:\\Users\\Eldab\\SakanyApp\\Sakany.csproj",
-        "packagesPath": "C:\\Users\\Eldab\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Eldab\\SakanyApp\\obj\\",
+        "projectPath": "E:\\IT 230\\Level 3\\2nd term\\WDT Project\\Projects\\SakanyApp\\Sakany.csproj",
+        "packagesPath": "C:\\Users\\BR\\.nuget\\packages\\",
+        "outputPath": "E:\\IT 230\\Level 3\\2nd term\\WDT Project\\Projects\\SakanyApp\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\Eldab\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\BR\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -43,8 +37,7 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        },
-        "SdkAnalysisLevel": "9.0.300"
+        }
       },
       "frameworks": {
         "net8.0": {
@@ -106,7 +99,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.312/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.421/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
