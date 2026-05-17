@@ -1,7 +1,14 @@
-﻿@model IEnumerable<Sakany.Models.Request>
+﻿@model List<Sakany.Models.Request>
 @{
     ViewData["Title"] = "Requests";
     var role = Context.Session.GetString("UserRole");
+
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int totalCount = ViewBag.TotalCount ?? 0;
+
+    string PageUrl(int page) =>
+        $"?pageNumber={page}";
 }
 
 <div class="container py-4">
@@ -15,16 +22,14 @@
                 }
                 else if (role == "Owner")
                 {
-
                     <text>Requests on My Properties</text>
                 }
                 else
                 {
-
                     <text>All Requests</text>
                 }
             </h2>
-            <p class="text-muted mb-0">@Model.Count() request(s)</p>
+            <p class="text-muted mb-0">@totalCount request(s)</p>
         </div>
         @if (role == "Tenant")
         {
@@ -87,8 +92,8 @@
                             <td class="small text-muted">@item.Date.ToString("dd MMM yyyy")</td>
                             <td>
                                 <span class="status-badge
-                                            @(item.Status == Sakany.Models.RequestStatus.Pending ? "status-pending" :
-                                                                                item.Status == Sakany.Models.RequestStatus.Approved ? "status-approved" : "status-rejected")">
+                                                    @(item.Status == Sakany.Models.RequestStatus.Pending ? "status-pending" :
+                                                                                        item.Status == Sakany.Models.RequestStatus.Approved ? "status-approved" : "status-rejected")">
                                 @item.Status
                             </span>
                         </td>
@@ -120,6 +125,79 @@
                 </table>
             </div>
         </div>
+
+        <!-- ── PAGINATION ────────────────────────────────── -->
+        @if (totalPages > 1)
+        {
+            <nav class="mt-4 d-flex justify-content-center align-items-center gap-2">
+
+                @if (currentPage > 1)
+                {
+                    <a href="@PageUrl(currentPage - 1)" class="page-btn page-btn-arrow">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                }
+                else
+                {
+                    <span class="page-btn page-btn-arrow disabled">
+                        <i class="bi bi-chevron-left"></i>
+                    </span>
+                }
+
+                @{
+                    int startPage = Math.Max(1, currentPage - 2);
+                    int endPage = Math.Min(totalPages, currentPage + 2);
+                }
+
+                @if (startPage > 1)
+                {
+                    <a href="@PageUrl(1)" class="page-btn">1</a>
+                    @if (startPage > 2)
+                    {
+                        <span class="page-dots">…</span>
+                    }
+                }
+
+                @for (int p = startPage; p <= endPage; p++)
+                {
+                    @if (p == currentPage)
+                    {
+                        <span class="page-btn page-btn-active">@p</span>
+                    }
+                    else
+                    {
+                        <a href="@PageUrl(p)" class="page-btn">@p</a>
+                    }
+                }
+
+                @if (endPage < totalPages)
+                {
+                    @if (endPage < totalPages - 1)
+                    {
+                        <span class="page-dots">…</span>
+                    }
+                    <a href="@PageUrl(totalPages)" class="page-btn">@totalPages</a>
+                }
+
+                @if (currentPage < totalPages)
+                {
+                    <a href="@PageUrl(currentPage + 1)" class="page-btn page-btn-arrow">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                }
+                else
+                {
+                    <span class="page-btn page-btn-arrow disabled">
+                        <i class="bi bi-chevron-right"></i>
+                    </span>
+                }
+
+            </nav>
+
+            <p class="text-center text-muted small mt-2">
+                Page @currentPage of @totalPages &nbsp;·&nbsp; @totalCount requests total
+            </p>
+        }
     }
 </div>
 
@@ -162,5 +240,51 @@
     .status-rejected {
         background: #f8d7da;
         color: #721c24;
+    }
+
+    .page-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 38px;
+        height: 38px;
+        padding: 0 .6rem;
+        border-radius: 8px;
+        font-size: .875rem;
+        font-weight: 500;
+        color: #444;
+        background: #fff;
+        border: 1px solid #dee2e6;
+        text-decoration: none;
+        transition: all .2s;
+    }
+
+        .page-btn:hover:not(.disabled):not(.page-btn-active) {
+            background: #f8f9fa;
+            border-color: #e74c3c;
+            color: #e74c3c;
+        }
+
+    .page-btn-active {
+        background: #e74c3c;
+        border-color: #e74c3c;
+        color: #fff !important;
+        font-weight: 700;
+        pointer-events: none;
+    }
+
+    .page-btn.disabled {
+        opacity: .4;
+        pointer-events: none;
+    }
+
+    .page-dots {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 28px;
+        height: 38px;
+        color: #aaa;
+        font-size: .85rem;
     }
 </style>

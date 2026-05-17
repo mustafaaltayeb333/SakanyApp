@@ -23,9 +23,10 @@ namespace Sakany.Controllers
         private bool IsTenant => SessionRole == "Tenant";
 
         // ── INDEX ─────────────────────────────────────────
-        // Admin: all reviews. Owner: reviews on their properties. Tenant: their own reviews.
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int pageNumber = 1)
         {
+            int pageSize = 9;
+
             var query = _context.Review
                 .Include(r => r.Client)
                 .Include(r => r.Property)
@@ -37,8 +38,15 @@ namespace Sakany.Controllers
             else if (IsTenant)
                 query = query.Where(r => r.ClientID == SessionUserID);
 
-            var reviews = await query.OrderByDescending(r => r.Date).ToListAsync();
-            return View(reviews);
+            // ── PAGINATION ────────────────────────────────
+            var paginatedResult = await PaginatedList<Review>.CreateAsync(
+                query.OrderByDescending(r => r.Date), pageNumber, pageSize);
+
+            ViewBag.CurrentPage = paginatedResult.PageIndex;
+            ViewBag.TotalPages = paginatedResult.TotalPages;
+            ViewBag.TotalCount = paginatedResult.TotalCount;
+
+            return View(paginatedResult.Items);
         }
 
         // ── DETAILS ───────────────────────────────────────
@@ -54,7 +62,6 @@ namespace Sakany.Controllers
 
             if (review == null) return NotFound();
 
-            // Tenant can only see their own review
             if (IsTenant && review.ClientID != SessionUserID)
             {
                 TempData["Error"] = "You can only view your own reviews.";
@@ -64,7 +71,7 @@ namespace Sakany.Controllers
             return View(review);
         }
 
-        // ── CREATE (Tenant only, must have Approved request, not yet reviewed) ──
+        // ── CREATE ────────────────────────────────────────
         public async Task<IActionResult> Create(string? requestId, string? propertyId)
         {
             if (!IsLoggedIn) return RedirectToAction("Login", "Account");
@@ -75,7 +82,6 @@ namespace Sakany.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Tenant: only show their approved, un-reviewed requests
             var approvedRequests = await _context.Request
                 .Include(r => r.Property)
                 .Where(r => r.ClientID == SessionUserID &&
@@ -93,7 +99,6 @@ namespace Sakany.Controllers
                 approvedRequests.Select(r => new { r.ID, Display = r.Property?.Address ?? r.ID }),
                 "ID", "Display", requestId);
 
-            // Pre-fill PropertyID based on selected request
             if (!string.IsNullOrEmpty(requestId))
             {
                 var req = approvedRequests.FirstOrDefault(r => r.ID == requestId);
@@ -123,7 +128,6 @@ namespace Sakany.Controllers
             ModelState.Remove("ClientID");
             ModelState.Remove("PropertyID");
 
-            // Load and validate the request
             var request = await _context.Request
                 .Include(r => r.Property)
                 .FirstOrDefaultAsync(r => r.ID == review.RequestID);
@@ -154,7 +158,6 @@ namespace Sakany.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Rebuild dropdown on failure
             var approvedRequests = await _context.Request
                 .Include(r => r.Property)
                 .Where(r => r.ClientID == SessionUserID &&
@@ -169,7 +172,7 @@ namespace Sakany.Controllers
             return View(review);
         }
 
-        // ── EDIT (Tenant edits own review / Admin edits any) ──
+        // ── EDIT ──────────────────────────────────────────
         public async Task<IActionResult> Edit(string id)
         {
             if (!IsLoggedIn) return RedirectToAction("Login", "Account");
@@ -224,7 +227,6 @@ namespace Sakany.Controllers
                         return RedirectToAction(nameof(Index));
                     }
 
-                    // Preserve locked fields
                     review.ClientID = original.ClientID;
                     review.PropertyID = original.PropertyID;
                     review.RequestID = original.RequestID;
@@ -245,7 +247,7 @@ namespace Sakany.Controllers
             return View(review);
         }
 
-        // ── DELETE (Tenant deletes own / Admin deletes any) ──
+        // ── DELETE ────────────────────────────────────────
         public async Task<IActionResult> Delete(string id)
         {
             if (!IsLoggedIn) return RedirectToAction("Login", "Account");

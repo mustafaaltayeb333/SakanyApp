@@ -1,8 +1,14 @@
-﻿@model IEnumerable<Sakany.Models.Review>
+﻿@model List<Sakany.Models.Review>
 @{
     ViewData["Title"] = "Reviews";
     var role = Context.Session.GetString("UserRole");
     var userId = Context.Session.GetString("UserID");
+
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int totalCount = ViewBag.TotalCount ?? 0;
+
+    string PageUrl(int page) => $"?pageNumber={page}";
 }
 
 <div class="container py-4">
@@ -16,16 +22,14 @@
                 }
                 else if (role == "Owner")
                 {
-
                     <text>Reviews on My Properties</text>
                 }
                 else
                 {
-
                     <text>All Reviews</text>
                 }
             </h2>
-            <p class="text-muted mb-0">@Model.Count() review(s)</p>
+            <p class="text-muted mb-0">@totalCount review(s)</p>
         </div>
         @if (role == "Tenant")
         {
@@ -53,7 +57,6 @@
             {
                 <div class="col-md-6 col-lg-4">
                     <div class="review-card">
-                        <!-- Stars -->
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <div>
                                 @for (int i = 1; i <= 5; i++)
@@ -65,16 +68,13 @@
                             <small class="text-muted">@item.Date.ToString("dd MMM yyyy")</small>
                         </div>
 
-                        <!-- Description -->
                         <p class="review-text">@(string.IsNullOrEmpty(item.Description) ? "No comment." : item.Description)</p>
 
-                        <!-- Property -->
                         <div class="review-meta">
                             <i class="bi bi-buildings me-1 text-danger"></i>
                             <span class="small text-muted">@item.Property?.Address</span>
                         </div>
 
-                        <!-- Reviewer (for owner/admin) -->
                         @if (role != "Tenant")
                         {
                             <div class="review-meta mt-1">
@@ -83,7 +83,6 @@
                             </div>
                         }
 
-                        <!-- Actions -->
                         <div class="d-flex gap-2 mt-3">
                             <a asp-action="Details" asp-route-id="@item.ID"
                                class="btn btn-sm btn-outline-secondary flex-fill">
@@ -112,6 +111,79 @@
                 </div>
             }
         </div>
+
+        <!-- ── PAGINATION ────────────────────────────────── -->
+        @if (totalPages > 1)
+        {
+            <nav class="mt-5 d-flex justify-content-center align-items-center gap-2">
+
+                @if (currentPage > 1)
+                {
+                    <a href="@PageUrl(currentPage - 1)" class="page-btn page-btn-arrow">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                }
+                else
+                {
+                    <span class="page-btn page-btn-arrow disabled">
+                        <i class="bi bi-chevron-left"></i>
+                    </span>
+                }
+
+                @{
+                    int startPage = Math.Max(1, currentPage - 2);
+                    int endPage = Math.Min(totalPages, currentPage + 2);
+                }
+
+                @if (startPage > 1)
+                {
+                    <a href="@PageUrl(1)" class="page-btn">1</a>
+                    @if (startPage > 2)
+                    {
+                        <span class="page-dots">…</span>
+                    }
+                }
+
+                @for (int p = startPage; p <= endPage; p++)
+                {
+                    @if (p == currentPage)
+                    {
+                        <span class="page-btn page-btn-active">@p</span>
+                    }
+                    else
+                    {
+                        <a href="@PageUrl(p)" class="page-btn">@p</a>
+                    }
+                }
+
+                @if (endPage < totalPages)
+                {
+                    @if (endPage < totalPages - 1)
+                    {
+                        <span class="page-dots">…</span>
+                    }
+                    <a href="@PageUrl(totalPages)" class="page-btn">@totalPages</a>
+                }
+
+                @if (currentPage < totalPages)
+                {
+                    <a href="@PageUrl(currentPage + 1)" class="page-btn page-btn-arrow">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                }
+                else
+                {
+                    <span class="page-btn page-btn-arrow disabled">
+                        <i class="bi bi-chevron-right"></i>
+                    </span>
+                }
+
+            </nav>
+
+            <p class="text-center text-muted small mt-2">
+                Page @currentPage of @totalPages &nbsp;·&nbsp; @totalCount reviews total
+            </p>
+        }
     }
 </div>
 
@@ -158,5 +230,51 @@
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
+    }
+
+    .page-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 38px;
+        height: 38px;
+        padding: 0 .6rem;
+        border-radius: 8px;
+        font-size: .875rem;
+        font-weight: 500;
+        color: #444;
+        background: #fff;
+        border: 1px solid #dee2e6;
+        text-decoration: none;
+        transition: all .2s;
+    }
+
+        .page-btn:hover:not(.disabled):not(.page-btn-active) {
+            background: #f8f9fa;
+            border-color: #e74c3c;
+            color: #e74c3c;
+        }
+
+    .page-btn-active {
+        background: #e74c3c;
+        border-color: #e74c3c;
+        color: #fff !important;
+        font-weight: 700;
+        pointer-events: none;
+    }
+
+    .page-btn.disabled {
+        opacity: .4;
+        pointer-events: none;
+    }
+
+    .page-dots {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 28px;
+        height: 38px;
+        color: #aaa;
+        font-size: .85rem;
     }
 </style>

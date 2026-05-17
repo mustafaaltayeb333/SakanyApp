@@ -30,9 +30,11 @@ namespace Sakany.Controllers
         private bool IsTenant => SessionRole == "Tenant";
 
         // ── INDEX ─────────────────────────────────────────
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int pageNumber = 1)
         {
             if (!IsLoggedIn) return RedirectToAction("Login", "Account");
+
+            int pageSize = 10;
 
             var query = _context.Request
                 .Include(r => r.Client)
@@ -45,8 +47,15 @@ namespace Sakany.Controllers
             else if (IsTenant)
                 query = query.Where(r => r.ClientID == SessionUserID);
 
-            var requests = await query.OrderByDescending(r => r.Date).ToListAsync();
-            return View(requests);
+            // ── PAGINATION ────────────────────────────────
+            var paginatedResult = await PaginatedList<Request>.CreateAsync(
+                query.OrderByDescending(r => r.Date), pageNumber, pageSize);
+
+            ViewBag.CurrentPage = paginatedResult.PageIndex;
+            ViewBag.TotalPages = paginatedResult.TotalPages;
+            ViewBag.TotalCount = paginatedResult.TotalCount;
+
+            return View(paginatedResult.Items);
         }
 
         // ── DETAILS ───────────────────────────────────────
@@ -159,7 +168,7 @@ namespace Sakany.Controllers
             return View(request);
         }
 
-        // ── EDIT (Owner approves/rejects / Admin / Tenant cannot) ────────────
+        // ── EDIT ──────────────────────────────────────────
         public async Task<IActionResult> Edit(string id)
         {
             if (!IsLoggedIn) return RedirectToAction("Login", "Account");
@@ -222,11 +231,9 @@ namespace Sakany.Controllers
                         }
                     }
 
-                    // ── PENDING → APPROVED ────────────────────────────
                     if (original.Status == RequestStatus.Pending &&
                         request.Status == RequestStatus.Approved)
                     {
-                        // تحقق إن مفيش contract موجود بالفعل لهذا الـ request
                         var existingContract = await _context.Contract
                             .FirstOrDefaultAsync(c => c.RequestID == original.ID);
 
@@ -236,7 +243,6 @@ namespace Sakany.Controllers
                         }
                         else
                         {
-                            // 1) Decrement available rooms
                             var property = await _context.Property.FindAsync(original.PropertyID);
                             if (property == null || property.AvailableRooms <= 0)
                             {
@@ -248,7 +254,6 @@ namespace Sakany.Controllers
                             if (property.AvailableRooms == 0)
                                 property.Status = PropertyStatus.Rented;
 
-                            // 2) Create Contract
                             var contract = new Contract
                             {
                                 ID = Guid.NewGuid().ToString(),
@@ -265,14 +270,12 @@ namespace Sakany.Controllers
                             _context.Add(contract);
                             await _context.SaveChangesAsync();
 
-                            // 3) Load navigation props for PDF
                             var fullContract = await _context.Contract
                                 .Include(c => c.Owner)
                                 .Include(c => c.Tenant)
                                 .Include(c => c.Property)
                                 .FirstAsync(c => c.ID == contract.ID);
 
-                            // 4) Generate PDF
                             byte[] pdf = _pdfService.GenerateContractPdf(fullContract);
 
                             string subject = $"Sakany — Your Rental Contract #{fullContract.ID[..8].ToUpper()}";
@@ -297,7 +300,6 @@ namespace Sakany.Controllers
 
                             string fileName = $"contract_{fullContract.ID[..8].ToUpper()}.pdf";
 
-                            // 5) Send emails
                             try
                             {
                                 await _emailService.SendEmailWithAttachmentAsync(
@@ -320,7 +322,6 @@ namespace Sakany.Controllers
                         }
                     }
 
-                    // ── SAVE REQUEST STATUS ───────────────────────────
                     request.ClientID = original.ClientID;
                     request.PropertyID = original.PropertyID;
                     request.Date = original.Date;

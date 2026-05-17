@@ -37,11 +37,9 @@ namespace Sakany.Controllers
                     .ThenInclude(pa => pa.Amenity)
                 .AsQueryable();
 
-            // Owner sees ONLY their own listings
             if (IsOwner && !IsAdmin)
                 query = query.Where(p => p.OwnerID == SessionUserID);
 
-            // Tenant sees only Available
             if (IsTenant)
                 query = query.Where(p => p.Status == PropertyStatus.Available);
 
@@ -61,36 +59,24 @@ namespace Sakany.Controllers
                 query = query.Where(p => p.Price <= maxPrice);
 
             // ── PAGINATION ────────────────────────────────
-            int totalCount = await query.CountAsync();
-            int totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+            var paginatedResult = await PaginatedList<Property>.CreateAsync(
+                query.OrderByDescending(p => p.CreatedAt), pageNumber, pageSize);
 
-            // Clamp pageNumber
-            if (pageNumber < 1) pageNumber = 1;
-            if (pageNumber > totalPages && totalPages > 0) pageNumber = totalPages;
-
-            var properties = await query
-                .OrderByDescending(p => p.CreatedAt)
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            ViewBag.CurrentPage = pageNumber;
-            ViewBag.TotalPages = totalPages;
-            ViewBag.TotalCount = totalCount;
+            ViewBag.CurrentPage = paginatedResult.PageIndex;
+            ViewBag.TotalPages = paginatedResult.TotalPages;
+            ViewBag.TotalCount = paginatedResult.TotalCount;
 
             // ── FILTER DROPDOWNS ──────────────────────────
             ViewBag.Cities = await _context.Property.Select(p => p.City).Distinct().OrderBy(c => c).ToListAsync();
             ViewBag.Types = Enum.GetNames(typeof(PropertyType));
             ViewBag.Statuses = Enum.GetNames(typeof(PropertyStatus));
 
-            // Pass current filter values back
             ViewBag.CurrentCity = city;
             ViewBag.CurrentType = type;
             ViewBag.CurrentStatus = status;
             ViewBag.CurrentMinPrice = minPrice;
             ViewBag.CurrentMaxPrice = maxPrice;
 
-            // Wishlist IDs for the current tenant (to show filled heart)
             if (IsTenant && IsLoggedIn)
             {
                 var wishlistIds = await _context.Wishlist
@@ -104,7 +90,7 @@ namespace Sakany.Controllers
                 ViewBag.WishlistIds = new List<string>();
             }
 
-            return View(properties);
+            return View(paginatedResult.Items);
         }
 
         // ── DETAILS ───────────────────────────────────────
@@ -153,7 +139,7 @@ namespace Sakany.Controllers
             return View(property);
         }
 
-        // ── CREATE (Owner / Admin only) ───────────────────
+        // ── CREATE ────────────────────────────────────────
         public IActionResult Create()
         {
             if (!IsLoggedIn) return RedirectToAction("Login", "Account");
@@ -219,7 +205,7 @@ namespace Sakany.Controllers
             return View(property);
         }
 
-        // ── EDIT (Owner of property / Admin only) ─────────
+        // ── EDIT ──────────────────────────────────────────
         public async Task<IActionResult> Edit(string? id)
         {
             if (!IsLoggedIn) return RedirectToAction("Login", "Account");
@@ -302,7 +288,7 @@ namespace Sakany.Controllers
             return View(property);
         }
 
-        // ── DELETE (Owner of property / Admin only) ───────
+        // ── DELETE ────────────────────────────────────────
         public async Task<IActionResult> Delete(string? id)
         {
             if (!IsLoggedIn) return RedirectToAction("Login", "Account");
