@@ -1,0 +1,186 @@
+@model Sakany.Models.Report
+@{
+    ViewData["Title"] = "Report Details";
+    var isAdmin = Context.Session.GetString("UserRole") == "Admin";
+    var statusClass = Model.Status switch
+    {
+        ReportStatus.Pending => "bg-warning text-dark",
+        ReportStatus.Reviewed => "bg-info",
+        ReportStatus.Dismissed => "bg-secondary",
+        _ => "bg-secondary"
+    };
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Reports</a></li>
+            <li class="breadcrumb-item active">Details</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <!-- Main Report Card -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-bottom-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-flag-fill me-2 text-danger"></i>Report #@Model.ID[..8].ToUpper()</h5>
+                    <span class="badge @statusClass fs-6 px-3 py-2">
+                        <i class="bi bi-circle-fill me-1 small"></i>@Model.Status
+                    </span>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Reporter Info -->
+                    <div class="d-flex align-items-center gap-3 mb-4 p-3 bg-light rounded">
+                        <div class="reporter-avatar">
+                            @(Model.Reporter?.Name?[0].ToString().ToUpper() ?? "U")
+                        </div>
+                        <div>
+                            <h6 class="mb-1">@Model.Reporter?.Name</h6>
+                            <p class="text-muted small mb-0">
+                                <i class="bi bi-envelope me-1"></i>@Model.Reporter?.Email
+                                <span class="mx-2">|</span>
+                                <i class="bi bi-telephone me-1"></i>@Model.Reporter?.Phone
+                            </p>
+                        </div>
+                        <div class="ms-auto text-end">
+                            <small class="text-muted d-block">Submitted</small>
+                            <strong>@Model.CreatedAt.ToString("MMM dd, yyyy HH:mm")</strong>
+                        </div>
+                    </div>
+
+                    <!-- Reason -->
+                    <div class="mb-4">
+                        <h6 class="text-primary mb-2"><i class="bi bi-chat-left-text me-2"></i>Report Reason</h6>
+                        <div class="p-3 border rounded bg-white">
+                            <p class="mb-0">@Model.Reason</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Property Card -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+                    <h5 class="mb-0"><i class="bi bi-building me-2 text-primary"></i>Reported Property</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            @if (Model.Property?.Image?.Any() == true)
+                            {
+                                <img src="@Model.Property.Image.First().ImageURL" class="w-100 rounded" style="height: 150px; object-fit: cover;" alt="Property" />
+                            }
+                            else
+                            {
+                                <div class="w-100 rounded bg-light d-flex align-items-center justify-content-center" style="height: 150px;">
+                                    <i class="bi bi-image display-5 text-muted"></i>
+                                </div>
+                            }
+                        </div>
+                        <div class="col-md-8">
+                            <h5 class="mb-2">@Model.Property?.Address</h5>
+                            <p class="text-muted mb-3"><i class="bi bi-geo-alt me-1"></i>@Model.Property?.City</p>
+                            <div class="row g-2">
+                                <div class="col-4">
+                                    <div class="p-2 bg-light rounded text-center">
+                                        <div class="fw-bold text-primary">@Model.Property?.Price.ToString("C0")</div>
+                                        <small class="text-muted">Price</small>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="p-2 bg-light rounded text-center">
+                                        <div class="fw-bold text-primary">@Model.Property?.Type</div>
+                                        <small class="text-muted">Type</small>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="p-2 bg-light rounded text-center">
+                                        <div class="fw-bold text-primary">@Model.Property?.BedRooms</div>
+                                        <small class="text-muted">Beds</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <a asp-controller="Property" asp-action="Details" asp-route-id="@Model.PropertyID" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-eye me-1"></i>View Property
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            @if (isAdmin)
+            {
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+                        <h5 class="mb-0"><i class="bi bi-sliders me-2 text-primary"></i>Manage Report</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="d-grid gap-2">
+                            <a asp-action="Edit" asp-route-id="@Model.ID" class="btn btn-warning">
+                                <i class="bi bi-pencil-square me-1"></i>Edit Status
+                            </a>
+                            <hr />
+                            <form asp-action="Delete" asp-route-id="@Model.ID" method="post" onsubmit="return confirm('Delete this report permanently?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-outline-danger w-100">
+                                    <i class="bi bi-trash me-1"></i>Delete Report
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2 text-primary"></i>Metadata</h5>
+                </div>
+                <div class="card-body p-4">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-3">
+                            <small class="text-muted d-block">Report ID</small>
+                            <code class="bg-light px-2 py-1 rounded">@Model.ID</code>
+                        </li>
+                        <li class="mb-3">
+                            <small class="text-muted d-block">Property ID</small>
+                            <code class="bg-light px-2 py-1 rounded">@Model.PropertyID</code>
+                        </li>
+                        <li class="mb-3">
+                            <small class="text-muted d-block">Reporter ID</small>
+                            <code class="bg-light px-2 py-1 rounded">@Model.ReporterID</code>
+                        </li>
+                        <li class="mb-3">
+                            <small class="text-muted d-block">Submitted</small>
+                            <strong>@Model.CreatedAt.ToString("MMM dd, yyyy")</strong>
+                        </li>
+                        <li>
+                            <small class="text-muted d-block">Current Status</small>
+                            <span class="badge @statusClass">@Model.Status</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .reporter-avatar {
+        width: 50px;
+        height: 50px;
+        background: var(--sakany-primary, #e74c3c);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+</style>

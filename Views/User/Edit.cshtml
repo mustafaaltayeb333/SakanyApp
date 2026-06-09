@@ -1,62 +1,60 @@
 @model Sakany.Models.User
-
 @{
     ViewData["Title"] = "Edit User";
 }
 
 <div class="container py-4">
     <div class="row justify-content-center">
-        <div class="col-lg-6">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Edit User</h5>
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Edit User: @Model.Name</h4>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     <form asp-action="Edit" method="post">
-                        @Html.AntiForgeryToken()
-                        <!-- Critical: Hidden ID field for correct binding -->
                         <input type="hidden" asp-for="ID" />
-                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                         <div class="mb-3">
-                            <label asp-for="Name" class="form-label fw-semibold"></label>
-                            <input asp-for="Name" class="form-control" placeholder="Enter full name" />
-                            <span asp-validation-for="Name" class="text-danger"></span>
+                            <label asp-for="Name" class="form-label fw-semibold">Full Name</label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="Email" class="form-label fw-semibold"></label>
-                            <input asp-for="Email" class="form-control" type="email" placeholder="Enter email address" />
-                            <span asp-validation-for="Email" class="text-danger"></span>
+                            <label asp-for="Email" class="form-label fw-semibold">Email Address</label>
+                            <input asp-for="Email" type="email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="Phone" class="form-label fw-semibold"></label>
-                            <input asp-for="Phone" class="form-control" placeholder="Enter phone number" />
-                            <span asp-validation-for="Phone" class="text-danger"></span>
+                            <label asp-for="Phone" class="form-label fw-semibold">Phone Number</label>
+                            <input asp-for="Phone" class="form-control" />
+                            <span asp-validation-for="Phone" class="text-danger small"></span>
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="Role" class="form-label fw-semibold">User Role</label>
-                            <select asp-for="Role" asp-items="Html.GetEnumSelectList<UserRole>()" class="form-select"></select>
-                            <span asp-validation-for="Role" class="text-danger"></span>
-                            <small class="text-muted">Changing role affects platform permissions</small>
+                            <label asp-for="Role" class="form-label fw-semibold">Role</label>
+                            <select asp-for="Role" class="form-select" asp-items="Html.GetEnumSelectList<UserRole>()"></select>
+                            <span asp-validation-for="Role" class="text-danger small"></span>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="newPassword" class="form-label fw-semibold">New Password (optional)</label>
-                            <input type="password" name="newPassword" id="newPassword" class="form-control" placeholder="Leave blank to keep current password" />
-                            <small class="text-muted">Only enter if you want to change the password. Minimum 6 characters.</small>
+                        <div class="alert alert-info border-0 bg-light">
+                            <h6 class="alert-heading"><i class="bi bi-shield-lock me-2"></i>Password Management</h6>
+                            <p class="mb-2 small text-muted">Leave blank to keep the current password. Enter a new password to reset it.</p>
+                            <div class="mb-0">
+                                <label for="newPassword" class="form-label fw-semibold small">New Password (optional)</label>
+                                <input type="password" name="newPassword" id="newPassword" class="form-control" placeholder="Min. 6 characters to reset" />
+                                <span class="text-danger small">@ViewData.ModelState["newPassword"]?.Errors.FirstOrDefault()?.ErrorMessage</span>
+                            </div>
                         </div>
 
-                        <hr />
-
-                        <div class="d-flex justify-content-between">
+                        <div class="d-flex justify-content-between mt-4">
                             <a asp-action="Index" class="btn btn-outline-secondary">
                                 <i class="bi bi-arrow-left me-1"></i>Back to List
                             </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-save me-1"></i>Save Changes
+                            <button type="submit" class="btn btn-warning px-4">
+                                <i class="bi bi-check-lg me-1"></i>Save Changes
                             </button>
                         </div>
                     </form>

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Sakany.Migrations
 {
     /// <inheritdoc />
-    public partial class initNSeed : Migration
+    public partial class ExtendNotificationModel : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -50,7 +50,12 @@ namespace Sakany.Migrations
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Body = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsRead = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Priority = table.Column<int>(type: "int", nullable: false),
+                    ActionUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ActionText = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ReadAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    NotificationType = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -341,12 +346,12 @@ namespace Sakany.Migrations
                 columns: new[] { "ID", "Email", "Name", "Password", "Phone", "Role" },
                 values: new object[,]
                 {
-                    { "O1", "ahmed@example.com", "Ahmed Owner", "hashed_pass", "01012345678", 1 },
-                    { "O2", "sara@example.com", "Sara Owner", "hashed_pass", "01012345679", 1 },
-                    { "O3", "mona@example.com", "Mona Owner", "hashed_pass", "01012345680", 1 },
-                    { "O4", "omar@example.com", "Omar Owner", "hashed_pass", "01012345681", 1 },
-                    { "O5", "zain@example.com", "Zain Owner", "hashed_pass", "01012345682", 1 },
-                    { "O6", "admin@example.com", "Jose Gonzales", "hashed_pass", "01012345682", 1 }
+                    { "O1", "ahmed@example.com", "Ahmed Owner", "AQAAAAIAAYagAAAAEFw4GB7+jY88+9xHhM7vLbK03aMKo8bw79vvOoI6mVmmWPvHkF5GkpZMDJMIOW89Tw==", "01012345678", 1 },
+                    { "O2", "sara@example.com", "Sara Owner", "AQAAAAIAAYagAAAAELKh53lolm/uTrHlDOl27u0KTI14emNpiRpStXmgJvfp5j2xvFMi7abwoeCXZ1s5lw==", "01012345679", 1 },
+                    { "O3", "mona@example.com", "Mona Owner", "AQAAAAIAAYagAAAAEPw6OzwUVg17yX6unfUR433ZrDBjLg39eNXJT6kOBMiCwo33E7XQdQLgSxHDzjbQDg==", "01012345680", 1 },
+                    { "O4", "omar@example.com", "Omar Owner", "AQAAAAIAAYagAAAAEI/GqPsNc2JHl/fR5rvEntlZ0u8Lz4OOwbJsF4uO7tp2Ln4yCV8p2NnPv9+Wq34YpA==", "01012345681", 1 },
+                    { "O5", "zain@example.com", "Zain Owner", "AQAAAAIAAYagAAAAEM/56WTxql7B+r0S8EHKCkbirMbhKVCSb5DvdzGWigPD3FtU0QsTDxANzdECHHQ0tw==", "01012345682", 1 },
+                    { "O6", "admin@example.com", "Jose Gonzales", "AQAAAAIAAYagAAAAEBbXB4BxOxgwG6oyaU3lWh0vIURhCV8I5rPYVK1W5kDUO0N4YRwj/e3+ouZU5xad5Q==", "01012345682", 0 }
                 });
 
             migrationBuilder.InsertData(

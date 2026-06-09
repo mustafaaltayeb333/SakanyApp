@@ -3,16 +3,19 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Sakany.Data;
 using Sakany.Models;
+using Sakany.Services;
 
 namespace Sakany.Controllers
 {
     public class ReviewsController : Controller
     {
         private readonly SakanyDbContext _context;
+        private readonly INotificationService _notificationService;
 
-        public ReviewsController(SakanyDbContext context)
+        public ReviewsController(SakanyDbContext context, INotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         private string? SessionUserID => HttpContext.Session.GetString("UserID");
@@ -38,13 +41,13 @@ namespace Sakany.Controllers
             else if (IsTenant)
                 query = query.Where(r => r.ClientID == SessionUserID);
 
-            // ── PAGINATION ────────────────────────────────
             var paginatedResult = await PaginatedList<Review>.CreateAsync(
                 query.OrderByDescending(r => r.Date), pageNumber, pageSize);
 
             ViewBag.CurrentPage = paginatedResult.PageIndex;
             ViewBag.TotalPages = paginatedResult.TotalPages;
             ViewBag.TotalCount = paginatedResult.TotalCount;
+            ViewBag.AverageRating = await query.AverageAsync(r => (double?)r.Rate) ?? 0;
 
             return View(paginatedResult.Items);
         }
@@ -57,6 +60,9 @@ namespace Sakany.Controllers
             var review = await _context.Review
                 .Include(r => r.Client)
                 .Include(r => r.Property)
+                .ThenInclude(p => p.Image)
+                .Include(r => r.Property)
+                .ThenInclude(p => p.Owner)
                 .Include(r => r.Request)
                 .FirstOrDefaultAsync(m => m.ID == id);
 
@@ -153,6 +159,15 @@ namespace Sakany.Controllers
 
                 _context.Add(review);
                 await _context.SaveChangesAsync();
+
+                // Notify property owner
+                await _notificationService.NotifyUserAsync(
+                    request.Property?.OwnerID ?? string.Empty,
+                    "New Review Received",
+                    $"{request.Property?.Address} was rated {review.Rate}/5 stars.",
+                    NotificationPriority.Normal,
+                    $"/Reviews/Details/{review.ID}",
+                    "View Review");
 
                 TempData["Success"] = "Review submitted successfully!";
                 return RedirectToAction(nameof(Index));

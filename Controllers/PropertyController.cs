@@ -1,249 +1,110 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Sakany.Data;
 using Sakany.Models;
+using Sakany.Services;
 
 namespace Sakany.Controllers
 {
     public class PropertyController : Controller
     {
         private readonly SakanyDbContext _context;
+        private readonly INotificationService _notificationService;
         private readonly IWebHostEnvironment _env;
 
-        public PropertyController(SakanyDbContext context, IWebHostEnvironment env)
+        public PropertyController(SakanyDbContext context, INotificationService notificationService, IWebHostEnvironment env)
         {
             _context = context;
+            _notificationService = notificationService;
             _env = env;
         }
 
         private string? SessionUserID => HttpContext.Session.GetString("UserID");
         private string? SessionRole => HttpContext.Session.GetString("UserRole");
-        private bool IsLoggedIn => SessionUserID != null;
+        private bool IsLoggedIn => !string.IsNullOrEmpty(SessionUserID);
         private bool IsAdmin => SessionRole == "Admin";
         private bool IsOwner => SessionRole == "Owner";
-        private bool IsTenant => SessionRole == "Tenant";
-
-        // ── helper: send a notification ───────────────────
-        private async Task SendNotification(string userId, string title, string body)
-        {
-            _context.Notification.Add(new Notification
-            {
-                ID = Guid.NewGuid().ToString(),
-                UserID = userId,
-                Title = title,
-                Body = body,
-                IsRead = false,
-                CreatedAt = DateTime.Now
-            });
-            await _context.SaveChangesAsync();
-        }
-
-        // ── helper: build Type / Status dropdowns ─────────
-        private void BuildDropdowns(Property? p = null)
-        {
-            ViewBag.TypeList = Enum.GetValues(typeof(PropertyType))
-                .Cast<PropertyType>()
-                .Select(t => new SelectListItem
-                {
-                    Value = t.ToString(),
-                    Text = t.ToString(),
-                    Selected = p != null && p.Type == t
-                }).ToList();
-
-            ViewBag.StatusList = Enum.GetValues(typeof(PropertyStatus))
-                .Cast<PropertyStatus>()
-                .Select(s => new SelectListItem
-                {
-                    Value = s.ToString(),
-                    Text = s.ToString(),
-                    Selected = p != null && p.Status == s
-                }).ToList();
-        }
-
-        // ── helper: save uploaded image file ──────────────
-        private async Task<string?> SaveImageFile(IFormFile file, string propertyId)
-        {
-            try
-            {
-                var allowed = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif" };
-                var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
-                if (!allowed.Contains(ext)) return null;
-
-                var folder = Path.Combine(_env.WebRootPath, "uploads", "properties");
-                Directory.CreateDirectory(folder);
-
-                var fileName = $"{propertyId}_{Guid.NewGuid()}{ext}";
-                using var stream = new FileStream(Path.Combine(folder, fileName), FileMode.Create);
-                await file.CopyToAsync(stream);
-                return $"/uploads/properties/{fileName}";
-            }
-            catch { return null; }
-        }
-
-        // ── helper: persist images from form ──────────────
-        private async Task SaveImages(
-            string propertyId,
-            IFormFile? mainFile, string? mainUrl,
-            List<IFormFile>? extraFiles, List<string>? extraUrls)
-        {
-            var urls = new List<string>();
-
-            if (mainFile?.Length > 0)
-            {
-                var s = await SaveImageFile(mainFile, propertyId);
-                if (s != null) urls.Add(s);
-            }
-            if (!string.IsNullOrWhiteSpace(mainUrl)) urls.Add(mainUrl.Trim());
-
-            if (extraFiles != null)
-                foreach (var f in extraFiles.Where(f => f.Length > 0))
-                {
-                    var s = await SaveImageFile(f, propertyId);
-                    if (s != null) urls.Add(s);
-                }
-
-            if (extraUrls != null)
-                foreach (var u in extraUrls.Where(u => !string.IsNullOrWhiteSpace(u)))
-                    urls.Add(u.Trim());
-
-            foreach (var url in urls)
-                _context.PropertyImage.Add(new PropertyImage
-                {
-                    ID = Guid.NewGuid().ToString(),
-                    PropertyID = propertyId,
-                    ImageURL = url,
-                    UploadDate = DateTime.Now
-                });
-
-            if (urls.Any()) await _context.SaveChangesAsync();
-        }
 
         // ═══════════════════════════════════════════════════
-        // INDEX
+        // INDEX — With Owner Filtering & Search
         // ═══════════════════════════════════════════════════
-        public async Task<IActionResult> Index(string? city, string? type, string? status,
-                                               decimal? minPrice, decimal? maxPrice, string? sortBy,
-                                               int pageNumber = 1)
+        public async Task<IActionResult> Index(string? city, string? type, string? search, string? viewMode)
         {
-            int pageSize = 9;
-
             var query = _context.Property
-                .Include(p => p.Owner)
                 .Include(p => p.Image)
-                .Include(p => p.PropertyAmenity).ThenInclude(pa => pa.Amenity)
+                .Include(p => p.Owner)
+                .Include(p => p.PropertyAmenity)
+                .ThenInclude(pa => pa.Amenity)
                 .AsQueryable();
 
-            if (IsOwner && !IsAdmin)
+            // ── Owner View Mode Filtering ──
+            if (IsOwner && viewMode == "mine")
+            {
                 query = query.Where(p => p.OwnerID == SessionUserID);
-
-            if (IsTenant)
+                ViewBag.ViewMode = "mine";
+                ViewBag.PageTitle = "My Properties";
+            }
+            else if (IsOwner && viewMode == "others")
+            {
+                query = query.Where(p => p.OwnerID != SessionUserID && p.Status == PropertyStatus.Available);
+                ViewBag.ViewMode = "others";
+                ViewBag.PageTitle = "Other Listings";
+            }
+            else if (IsOwner)
+            {
+                query = query.Where(p => p.OwnerID != SessionUserID && p.Status == PropertyStatus.Available);
+                ViewBag.ViewMode = "others";
+                ViewBag.PageTitle = "Browse Listings";
+            }
+            else if (!IsAdmin)
+            {
                 query = query.Where(p => p.Status == PropertyStatus.Available);
-
-            if (!string.IsNullOrEmpty(city))
-                query = query.Where(p => p.City == city);
-
-            if (!string.IsNullOrEmpty(type) && Enum.TryParse<PropertyType>(type, out var pt))
-                query = query.Where(p => p.Type == pt);
-
-            if (!string.IsNullOrEmpty(status) && Enum.TryParse<PropertyStatus>(status, out var ps))
-                query = query.Where(p => p.Status == ps);
-
-            if (minPrice.HasValue)
-                query = query.Where(p => p.Price >= minPrice);
-
-            if (maxPrice.HasValue)
-                query = query.Where(p => p.Price <= maxPrice);
-
-            // ── SORTING ───────────────────────────────────
-            query = sortBy?.ToLowerInvariant() switch
-            {
-                "price_asc" => query.OrderBy(p => p.Price),
-                "price_desc" => query.OrderByDescending(p => p.Price),
-                "recent" => query.OrderByDescending(p => p.CreatedAt),
-                _ => query.OrderByDescending(p => p.CreatedAt) // Default: recent first
-            };
-
-            // ── PAGINATION ────────────────────────────────
-            var paginatedResult = await PaginatedList<Property>.CreateAsync(
-                query, pageNumber, pageSize);
-
-            ViewBag.CurrentPage = paginatedResult.PageIndex;
-            ViewBag.TotalPages = paginatedResult.TotalPages;
-            ViewBag.TotalCount = paginatedResult.TotalCount;
-
-            // ── FILTER DROPDOWNS ──────────────────────────
-            ViewBag.Cities = await _context.Property.Select(p => p.City).Distinct().OrderBy(c => c).ToListAsync();
-            ViewBag.Types = Enum.GetNames(typeof(PropertyType));
-            ViewBag.Statuses = Enum.GetNames(typeof(PropertyStatus));
-
-            ViewBag.CurrentCity = city;
-            ViewBag.CurrentType = type;
-            ViewBag.CurrentStatus = status;
-            ViewBag.CurrentMinPrice = minPrice;
-            ViewBag.CurrentMaxPrice = maxPrice;
-            ViewBag.CurrentSort = sortBy ?? "recent";
-
-            if (IsTenant && IsLoggedIn)
-            {
-                var wishlistIds = await _context.Wishlist
-                    .Where(w => w.UserID == SessionUserID)
-                    .Select(w => w.PropertyID)
-                    .ToListAsync();
-                ViewBag.WishlistIds = wishlistIds;
+                ViewBag.ViewMode = "all";
+                ViewBag.PageTitle = "Properties";
             }
             else
             {
-                ViewBag.WishlistIds = new List<string>();
+                ViewBag.ViewMode = "all";
+                ViewBag.PageTitle = "All Properties";
             }
 
-            return View(paginatedResult.Items);
+            // ── Search Filters ──
+            if (!string.IsNullOrWhiteSpace(city))
+                query = query.Where(p => p.City == city);
+            if (!string.IsNullOrWhiteSpace(type))
+                query = query.Where(p => p.Type.ToString() == type);
+            if (!string.IsNullOrWhiteSpace(search))
+                query = query.Where(p => p.Address.Contains(search) || p.City.Contains(search));
+
+            // Dropdown data for filters
+            ViewBag.Cities = await _context.Property.Select(p => p.City).Distinct().OrderBy(c => c).ToListAsync();
+            ViewBag.Types = Enum.GetNames(typeof(PropertyType)).ToList();
+
+            var list = await query.OrderByDescending(p => p.CreatedAt).ToListAsync();
+            return View(list);
         }
 
         // ═══════════════════════════════════════════════════
         // DETAILS
         // ═══════════════════════════════════════════════════
-        public async Task<IActionResult> Details(string? id)
+        public async Task<IActionResult> Details(string id)
         {
             if (id == null) return NotFound();
 
             var property = await _context.Property
-                .Include(p => p.Owner)
                 .Include(p => p.Image)
+                .Include(p => p.Owner)
                 .Include(p => p.PropertyAmenity)
-                    .ThenInclude(pa => pa.Amenity)
+                .ThenInclude(pa => pa.Amenity)
                 .Include(p => p.Reviews)
-                    .ThenInclude(r => r.Client)
+                .ThenInclude(r => r.Client)
                 .FirstOrDefaultAsync(p => p.ID == id);
 
             if (property == null) return NotFound();
 
-            if (IsTenant && IsLoggedIn)
-            {
-                ViewBag.IsInWishlist = await _context.Wishlist
-                    .AnyAsync(w => w.UserID == SessionUserID && w.PropertyID == id);
-
-                ViewBag.HasPendingRequest = await _context.Request
-                    .AnyAsync(r => r.ClientID == SessionUserID &&
-                                   r.PropertyID == id &&
-                                   r.Status == RequestStatus.Pending);
-
-                ViewBag.ApprovedRequestId = await _context.Request
-                    .Where(r => r.ClientID == SessionUserID &&
-                                r.PropertyID == id &&
-                                r.Status == RequestStatus.Approved)
-                    .Select(r => r.ID)
-                    .FirstOrDefaultAsync();
-
-                ViewBag.HasReviewed = await _context.Review
-                    .AnyAsync(r => r.ClientID == SessionUserID && r.PropertyID == id);
-            }
-
-            if (IsOwner && property.OwnerID == SessionUserID)
-            {
-                ViewBag.PendingRequestCount = await _context.Request
-                    .CountAsync(r => r.PropertyID == id && r.Status == RequestStatus.Pending);
-            }
+            ViewBag.IsReadOnly = IsOwner && property.OwnerID != SessionUserID;
+            ViewBag.CanEdit = IsAdmin || (IsOwner && property.OwnerID == SessionUserID);
+            ViewBag.CurrentUserId = SessionUserID;
 
             return View(property);
         }
@@ -254,14 +115,14 @@ namespace Sakany.Controllers
         public IActionResult Create()
         {
             if (!IsLoggedIn) return RedirectToAction("Login", "Account");
-            if (IsTenant) { TempData["Error"] = "Only owners can list properties."; return RedirectToAction(nameof(Index)); }
+            if (!IsAdmin && !IsOwner)
+            {
+                TempData["Error"] = "Only property owners can list properties.";
+                return RedirectToAction(nameof(Index));
+            }
 
-            BuildDropdowns();
-            if (IsAdmin)
-                ViewData["OwnerID"] = new SelectList(
-                    _context.User.Where(u => u.Role == UserRole.Owner), "ID", "Name");
-
-            return View(new Property { Status = PropertyStatus.Available, Type = PropertyType.Apartment });
+            ViewBag.Amenities = _context.Amenity.ToList();
+            return View();
         }
 
         // ═══════════════════════════════════════════════════
@@ -269,76 +130,93 @@ namespace Sakany.Controllers
         // ═══════════════════════════════════════════════════
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(
-            Property property,
-            IFormFile? imageFile, string? imageUrl,
-            List<IFormFile>? extraImages, List<string>? extraUrls)
+        public async Task<IActionResult> Create(Property property, List<IFormFile>? photos, List<string>? selectedAmenities)
         {
             if (!IsLoggedIn) return RedirectToAction("Login", "Account");
-            if (IsTenant) return Forbid();
+            if (!IsAdmin && !IsOwner)
+            {
+                TempData["Error"] = "Unauthorized.";
+                return RedirectToAction(nameof(Index));
+            }
 
-            ModelState.Remove("Owner"); ModelState.Remove("Image");
-            ModelState.Remove("PropertyAmenity"); ModelState.Remove("Wishlist");
-            ModelState.Remove("Requests"); ModelState.Remove("Reviews"); ModelState.Remove("Messages");
-
-            if (IsOwner) property.OwnerID = SessionUserID!;
-
-            if (!string.IsNullOrEmpty(property.OwnerID) &&
-                !await _context.User.AnyAsync(u => u.ID == property.OwnerID))
-                ModelState.AddModelError("OwnerID", "Selected owner does not exist.");
-
-            if (property.AvailableRooms > property.BedRooms)
-                ModelState.AddModelError("AvailableRooms", "Available rooms cannot exceed total bedrooms.");
+            ModelState.Remove("ID");
+            ModelState.Remove("Owner");
+            ModelState.Remove("Image");
+            ModelState.Remove("PropertyAmenity");
+            ModelState.Remove("Requests");
+            ModelState.Remove("Reviews");
+            ModelState.Remove("Contracts");
+            ModelState.Remove("Wishlist");
+            ModelState.Remove("Messages");
 
             if (ModelState.IsValid)
             {
                 property.ID = Guid.NewGuid().ToString();
+                property.OwnerID = SessionUserID!;
                 property.CreatedAt = DateTime.Now;
-                if (!IsAdmin) property.Status = PropertyStatus.Available;
 
                 _context.Add(property);
                 await _context.SaveChangesAsync();
 
-                await SaveImages(property.ID, imageFile, imageUrl, extraImages, extraUrls);
+                // Save photos
+                if (photos != null && photos.Any())
+                {
+                    await SavePropertyPhotosAsync(property.ID, photos);
+                }
 
-                TempData["Success"] = "Property listed successfully!";
-                return RedirectToAction(nameof(Index));
+                // Save amenities
+                if (selectedAmenities != null)
+                {
+                    foreach (var amenityId in selectedAmenities)
+                    {
+                        _context.PropertyAmenity.Add(new Property_Amenity
+                        {
+                            PropertyID = property.ID,
+                            AmenityID = amenityId
+                        });
+                    }
+                    await _context.SaveChangesAsync();
+                }
+
+                await _notificationService.NotifyAdminsAsync(
+                    "New Property Listed",
+                    $"Property in {property.City} was just listed.",
+                    NotificationPriority.Normal,
+                    $"/Property/Details/{property.ID}",
+                    "Review");
+
+                TempData["Success"] = "Property created successfully.";
+                return RedirectToAction(nameof(Index), new { viewMode = "mine" });
             }
 
-            BuildDropdowns(property);
-            if (IsAdmin)
-                ViewData["OwnerID"] = new SelectList(
-                    _context.User.Where(u => u.Role == UserRole.Owner), "ID", "Name", property.OwnerID);
-
+            ViewBag.Amenities = _context.Amenity.ToList();
             return View(property);
         }
 
         // ═══════════════════════════════════════════════════
         // EDIT GET
         // ═══════════════════════════════════════════════════
-        public async Task<IActionResult> Edit(string? id)
+        public async Task<IActionResult> Edit(string id)
         {
             if (!IsLoggedIn) return RedirectToAction("Login", "Account");
-            if (id == null) return NotFound();
 
-            var property = await _context.Property.FindAsync(id);
+            var property = await _context.Property
+                .Include(p => p.Image)
+                .Include(p => p.PropertyAmenity)
+                .ThenInclude(pa => pa.Amenity)
+                .FirstOrDefaultAsync(p => p.ID == id);
+
             if (property == null) return NotFound();
 
-            if (IsOwner && property.OwnerID != SessionUserID)
+            // Security: Only owner or admin can edit
+            if (!IsAdmin && property.OwnerID != SessionUserID)
             {
                 TempData["Error"] = "You can only edit your own properties.";
                 return RedirectToAction(nameof(Index));
             }
-            if (IsTenant)
-            {
-                TempData["Error"] = "Tenants cannot edit properties.";
-                return RedirectToAction(nameof(Index));
-            }
 
-            if (IsAdmin)
-                ViewData["OwnerID"] = new SelectList(
-                    _context.User.Where(u => u.Role == UserRole.Owner), "ID", "Name", property.OwnerID);
-
+            ViewBag.Amenities = _context.Amenity.ToList();
+            ViewBag.SelectedAmenityIds = property.PropertyAmenity.Select(pa => pa.AmenityID).ToList();
             return View(property);
         }
 
@@ -347,123 +225,185 @@ namespace Sakany.Controllers
         // ═══════════════════════════════════════════════════
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(
-            string id, Property property,
-            IFormFile? imageFile, string? imageUrl,
-            List<IFormFile>? extraImages, List<string>? extraUrls,
-            List<string>? deleteImageIds)
+        public async Task<IActionResult> Edit(string id, Property property, List<IFormFile>? newPhotos, List<string>? selectedAmenities, List<string>? deletePhotoIds)
         {
             if (!IsLoggedIn) return RedirectToAction("Login", "Account");
-            if (IsTenant) return Forbid();
             if (id != property.ID) return NotFound();
 
-            ModelState.Remove("Owner"); ModelState.Remove("Image");
-            ModelState.Remove("PropertyAmenity"); ModelState.Remove("Wishlist");
-            ModelState.Remove("Requests"); ModelState.Remove("Reviews"); ModelState.Remove("Messages");
+            var existing = await _context.Property
+                .Include(p => p.Image)
+                .Include(p => p.PropertyAmenity)
+                .FirstOrDefaultAsync(p => p.ID == id);
 
-            var existing = await _context.Property.AsNoTracking().FirstOrDefaultAsync(p => p.ID == id);
             if (existing == null) return NotFound();
 
-            if (IsOwner && existing.OwnerID != SessionUserID)
+            // Security
+            if (!IsAdmin && existing.OwnerID != SessionUserID)
             {
-                TempData["Error"] = "You can only edit your own properties.";
+                TempData["Error"] = "Unauthorized.";
                 return RedirectToAction(nameof(Index));
             }
 
-            if (IsOwner) property.OwnerID = existing.OwnerID;
-
-            if (property.AvailableRooms > property.BedRooms)
-                ModelState.AddModelError("AvailableRooms", "Available rooms cannot exceed total bedrooms.");
+            ModelState.Remove("Owner");
+            ModelState.Remove("Image");
+            ModelState.Remove("PropertyAmenity");
+            ModelState.Remove("Requests");
+            ModelState.Remove("Reviews");
+            ModelState.Remove("Contracts");
+            ModelState.Remove("Wishlist");
+            ModelState.Remove("Messages");
 
             if (ModelState.IsValid)
             {
-                try
-                {
-                    property.CreatedAt = existing.CreatedAt;
-                    _context.Update(property);
-                    await _context.SaveChangesAsync();
+                // Update scalar properties
+                existing.Price = property.Price;
+                existing.Address = property.Address;
+                existing.City = property.City;
+                existing.Type = property.Type;
+                existing.Status = property.Status;
+                existing.AvailableRooms = property.AvailableRooms;
+                existing.BedRooms = property.BedRooms;
+                existing.BathRooms = property.BathRooms;
+                existing.Area = property.Area;
 
-                    // Delete checked images
-                    if (deleteImageIds?.Any() == true)
+                // Delete selected photos
+                if (deletePhotoIds != null && deletePhotoIds.Any())
+                {
+                    foreach (var photoId in deletePhotoIds)
                     {
-                        var toDelete = await _context.PropertyImage
-                            .Where(i => deleteImageIds.Contains(i.ID) && i.PropertyID == id)
-                            .ToListAsync();
-                        _context.PropertyImage.RemoveRange(toDelete);
-                        await _context.SaveChangesAsync();
+                        var img = existing.Image.FirstOrDefault(i => i.ID == photoId);
+                        if (img != null)
+                        {
+                            var path = Path.Combine(_env.WebRootPath, img.ImageURL.TrimStart('/'));
+                            if (System.IO.File.Exists(path))
+                                System.IO.File.Delete(path);
+
+                            _context.PropertyImage.Remove(img);
+                        }
                     }
-
-                    await SaveImages(id, imageFile, imageUrl, extraImages, extraUrls);
-
-                    TempData["Success"] = "Property updated.";
-                    return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateConcurrencyException)
+
+                // Add new photos
+                if (newPhotos != null && newPhotos.Any())
                 {
-                    if (!_context.Property.Any(e => e.ID == id)) return NotFound();
-                    throw;
+                    await SavePropertyPhotosAsync(existing.ID, newPhotos);
                 }
+
+                // Update amenities
+                var currentAmenityIds = existing.PropertyAmenity.Select(pa => pa.AmenityID).ToList();
+                var newAmenityIds = selectedAmenities ?? new List<string>();
+
+                // Remove unselected
+                foreach (var pa in existing.PropertyAmenity.Where(pa => !newAmenityIds.Contains(pa.AmenityID)).ToList())
+                {
+                    _context.PropertyAmenity.Remove(pa);
+                }
+
+                // Add new selections
+                foreach (var amenityId in newAmenityIds.Where(aid => !currentAmenityIds.Contains(aid)))
+                {
+                    _context.PropertyAmenity.Add(new Property_Amenity { PropertyID = existing.ID, AmenityID = amenityId });
+                }
+
+                _context.Update(existing);
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = "Property updated successfully.";
+                return RedirectToAction(nameof(Index), new { viewMode = "mine" });
             }
 
-            property.Image = await _context.PropertyImage.Where(i => i.PropertyID == id).ToListAsync();
-            BuildDropdowns(property);
-            if (IsAdmin)
-                ViewData["OwnerID"] = new SelectList(
-                    _context.User.Where(u => u.Role == UserRole.Owner), "ID", "Name", property.OwnerID);
-
+            ViewBag.Amenities = _context.Amenity.ToList();
+            ViewBag.SelectedAmenityIds = existing.PropertyAmenity.Select(pa => pa.AmenityID).ToList();
             return View(property);
         }
 
         // ═══════════════════════════════════════════════════
-        // DELETE
+        // DELETE GET
         // ═══════════════════════════════════════════════════
-        public async Task<IActionResult> Delete(string? id)
+        public async Task<IActionResult> Delete(string id)
         {
-            if (id == null) return NotFound();
             if (!IsLoggedIn) return RedirectToAction("Login", "Account");
-            if (IsTenant) { TempData["Error"] = "Tenants cannot delete properties."; return RedirectToAction(nameof(Index)); }
 
-            var property = await _context.Property.Include(p => p.Owner).FirstOrDefaultAsync(p => p.ID == id);
+            var property = await _context.Property
+                .Include(p => p.Image)
+                .FirstOrDefaultAsync(p => p.ID == id);
+
             if (property == null) return NotFound();
 
-            if (IsOwner && property.OwnerID != SessionUserID)
+            if (!IsAdmin && property.OwnerID != SessionUserID)
             {
                 TempData["Error"] = "You can only delete your own properties.";
                 return RedirectToAction(nameof(Index));
             }
 
-            if (IsTenant)
-            {
-                TempData["Error"] = "Tenants cannot delete properties.";
-                return RedirectToAction(nameof(Index));
-            }
             return View(property);
         }
 
+        // ═══════════════════════════════════════════════════
+        // DELETE POST
+        // ═══════════════════════════════════════════════════
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             if (!IsLoggedIn) return RedirectToAction("Login", "Account");
-            if (IsTenant) return Forbid();
 
             var property = await _context.Property
-                .Include(p => p.PropertyAmenity)
                 .Include(p => p.Image)
                 .FirstOrDefaultAsync(p => p.ID == id);
 
-            if (property != null)
-            {
-                if (IsOwner && property.OwnerID != SessionUserID)
-                { TempData["Error"] = "Access denied."; return RedirectToAction(nameof(Index)); }
+            if (property == null) return NotFound();
 
-                _context.PropertyAmenity.RemoveRange(property.PropertyAmenity);
-                _context.PropertyImage.RemoveRange(property.Image);
-                _context.Property.Remove(property);
-                await _context.SaveChangesAsync();
-                TempData["Success"] = "Property deleted.";
+            if (!IsAdmin && property.OwnerID != SessionUserID)
+            {
+                TempData["Error"] = "Unauthorized.";
+                return RedirectToAction(nameof(Index));
             }
-            return RedirectToAction(nameof(Index));
+
+            // Delete all physical photo files
+            foreach (var img in property.Image)
+            {
+                var path = Path.Combine(_env.WebRootPath, img.ImageURL.TrimStart('/'));
+                if (System.IO.File.Exists(path))
+                    System.IO.File.Delete(path);
+            }
+
+            _context.Property.Remove(property);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Property deleted successfully.";
+            return RedirectToAction(nameof(Index), new { viewMode = "mine" });
+        }
+
+        // ═══════════════════════════════════════════════════
+        // HELPER: Save Photos
+        // ═══════════════════════════════════════════════════
+        private async Task SavePropertyPhotosAsync(string propertyId, List<IFormFile> photos)
+        {
+            var uploadPath = Path.Combine(_env.WebRootPath, "images", "properties");
+            if (!Directory.Exists(uploadPath))
+                Directory.CreateDirectory(uploadPath);
+
+            foreach (var photo in photos.Where(p => p.Length > 0))
+            {
+                var fileName = $"{Guid.NewGuid()}_{Path.GetFileName(photo.FileName)}";
+                var filePath = Path.Combine(uploadPath, fileName);
+                using var stream = new FileStream(filePath, FileMode.Create);
+                await photo.CopyToAsync(stream);
+
+                _context.PropertyImage.Add(new PropertyImage
+                {
+                    ID = Guid.NewGuid().ToString(),
+                    PropertyID = propertyId,
+                    ImageURL = $"/images/properties/{fileName}"
+                });
+            }
+            await _context.SaveChangesAsync();
+        }
+
+        private bool PropertyExists(string id)
+        {
+            return _context.Property.Any(e => e.ID == id);
         }
     }
 }

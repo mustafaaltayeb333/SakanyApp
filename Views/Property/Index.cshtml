@@ -1,470 +1,302 @@
-@model List<Sakany.Models.Property>
+@model IEnumerable<Sakany.Models.Property>
 @{
-    ViewData["Title"] = "Properties";
-    var role = Context.Session.GetString("UserRole");
-    var userId = Context.Session.GetString("UserID");
-    var wishlistIds = ViewBag.WishlistIds as List<string> ?? new List<string>();
-
-    int currentPage = ViewBag.CurrentPage ?? 1;
-    int totalPages = ViewBag.TotalPages ?? 1;
-    int totalCount = ViewBag.TotalCount ?? 0;
-    string currentSort = ViewBag.CurrentSort ?? "recent";
-
-    // Helper: build query string keeping all current filters + new page number + sort
-    string PageUrl(int page)
-    {
-        var qs = new System.Text.StringBuilder("?pageNumber=").Append(page);
-        if (!string.IsNullOrEmpty(ViewBag.CurrentCity as string)) qs.Append("&city=").Append(Uri.EscapeDataString(ViewBag.CurrentCity));
-        if (!string.IsNullOrEmpty(ViewBag.CurrentType as string)) qs.Append("&type=").Append(Uri.EscapeDataString(ViewBag.CurrentType));
-        if (!string.IsNullOrEmpty(ViewBag.CurrentStatus as string)) qs.Append("&status=").Append(Uri.EscapeDataString(ViewBag.CurrentStatus));
-        if (ViewBag.CurrentMinPrice != null) qs.Append("&minPrice=").Append(ViewBag.CurrentMinPrice);
-        if (ViewBag.CurrentMaxPrice != null) qs.Append("&maxPrice=").Append(ViewBag.CurrentMaxPrice);
-        if (!string.IsNullOrEmpty(currentSort) && currentSort != "recent") qs.Append("&sortBy=").Append(Uri.EscapeDataString(currentSort));
-        return qs.ToString();
-    }
-
-    // Helper: build sort URL preserving other filters
-    string SortUrl(string sortValue)
-    {
-        var qs = new System.Text.StringBuilder("?sortBy=").Append(Uri.EscapeDataString(sortValue));
-        if (!string.IsNullOrEmpty(ViewBag.CurrentCity as string)) qs.Append("&city=").Append(Uri.EscapeDataString(ViewBag.CurrentCity));
-        if (!string.IsNullOrEmpty(ViewBag.CurrentType as string)) qs.Append("&type=").Append(Uri.EscapeDataString(ViewBag.CurrentType));
-        if (!string.IsNullOrEmpty(ViewBag.CurrentStatus as string)) qs.Append("&status=").Append(Uri.EscapeDataString(ViewBag.CurrentStatus));
-        if (ViewBag.CurrentMinPrice != null) qs.Append("&minPrice=").Append(ViewBag.CurrentMinPrice);
-        if (ViewBag.CurrentMaxPrice != null) qs.Append("&maxPrice=").Append(ViewBag.CurrentMaxPrice);
-        return qs.ToString();
-    }
+    ViewData["Title"] = ViewBag.PageTitle ?? "Properties";
+    var viewMode = ViewBag.ViewMode as string ?? "all";
+    var userRole = Context.Session.GetString("UserRole");
+    var isOwner = userRole == "Owner";
+    var isAdmin = userRole == "Admin";
 }
 
 <div class="container py-4">
-
-    <!-- PAGE HEADER -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
         <div>
-            <h2 class="fw-bold mb-1" style="color:#1a1a2e">
-                @if (role == "Owner")
-                {
-                    <text><i class="bi bi-buildings me-2 text-danger"></i>My Properties</text>
-                }
-                else if (role == "Admin")
-                {
-                    <text><i class="bi bi-buildings me-2 text-danger"></i>All Properties</text>
-                }
-                else
-                {
-                    <text><i class="bi bi-search me-2 text-danger"></i>Find a Property</text>
-                }
-            </h2>
-            <p class="text-muted mb-0">@totalCount properties found</p>
+            <h2 class="mb-1"><i class="bi bi-buildings me-2 text-primary"></i>@ViewBag.PageTitle</h2>
+            <p class="text-muted mb-0"><span id="listingCount">@Model.Count()</span> listing@(Model.Count() != 1 ? "s" : "") found</p>
         </div>
-        @if (role == "Owner" || role == "Admin")
+
+        @if (isOwner)
         {
-            <a asp-action="Create" class="btn btn-danger px-4">
-                <i class="bi bi-plus-lg me-2"></i>List Property
+            <div class="btn-group shadow-sm" role="group">
+                <a asp-action="Index" asp-route-viewMode="mine"
+                   class="btn @(viewMode == "mine" ? "btn-primary" : "btn-outline-primary")">
+                    <i class="bi bi-person-video me-1"></i>My Properties
+                </a>
+                <a asp-action="Index" asp-route-viewMode="others"
+                   class="btn @(viewMode == "others" ? "btn-primary" : "btn-outline-primary")">
+                    <i class="bi bi-globe me-1"></i>Other Listings
+                </a>
+            </div>
+        }
+
+        @if (isOwner || isAdmin)
+        {
+            <a asp-action="Create" class="btn btn-success">
+                <i class="bi bi-plus-lg me-1"></i>Add Property
             </a>
         }
     </div>
 
-    <!-- FILTERS + SORT -->
-    <div class="filter-bar mb-4">
-        <form asp-action="Index" method="get" id="filterForm">
-            <div class="row g-2 align-items-end">
-                <div class="col-6 col-md-2">
-                    <label class="filter-label">City</label>
-                    <select name="city" class="form-select form-select-sm">
+    <!-- Search, Filters & Sort -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-3">
+            <form asp-action="Index" method="get" class="row g-2 align-items-end" id="filterForm">
+                <input type="hidden" name="viewMode" value="@viewMode" />
+                <div class="col-md-3 col-6">
+                    <label class="form-label small fw-semibold text-muted">City</label>
+                    <select name="city" class="form-select">
                         <option value="">All Cities</option>
-                        @foreach (var c in ViewBag.Cities)
+                        @foreach (var c in ViewBag.Cities as List<string> ?? new List<string>())
                         {
-                            <option value="@c" selected="@(c == ViewBag.CurrentCity ? "selected" : null)">@c</option>
+                            <option value="@c" selected="@(Context.Request.Query["city"] == c)">@c</option>
                         }
                     </select>
                 </div>
-                <div class="col-6 col-md-2">
-                    <label class="filter-label">Type</label>
-                    <select name="type" class="form-select form-select-sm">
-                        <option value="">Any Type</option>
-                        @foreach (var t in ViewBag.Types)
+                <div class="col-md-3 col-6">
+                    <label class="form-label small fw-semibold text-muted">Type</label>
+                    <select name="type" class="form-select">
+                        <option value="">All Types</option>
+                        @foreach (var t in ViewBag.Types as List<string> ?? new List<string>())
                         {
-                            <option value="@t" selected="@(t == ViewBag.CurrentType ? "selected" : null)">@t</option>
+                            <option value="@t" selected="@(Context.Request.Query["type"] == t)">@t</option>
                         }
                     </select>
                 </div>
-                @if (role == "Admin")
-                {
-                    <div class="col-6 col-md-2">
-                        <label class="filter-label">Status</label>
-                        <select name="status" class="form-select form-select-sm">
-                            <option value="">Any Status</option>
-                            @foreach (var s in ViewBag.Statuses)
-                            {
-                                <option value="@s" selected="@(s == ViewBag.CurrentStatus ? "selected" : null)">@s</option>
-                            }
-                        </select>
-                    </div>
-                }
-                <div class="col-6 col-md-2">
-                    <label class="filter-label">Min Price</label>
-                    <input type="number" name="minPrice" class="form-control form-control-sm"
-                           placeholder="0" value="@ViewBag.CurrentMinPrice" />
+                <div class="col-md-4 col-8">
+                    <label class="form-label small fw-semibold text-muted">Keyword</label>
+                    <input type="text" name="search" class="form-control" placeholder="Search address, city..." value="@Context.Request.Query["search"]" />
                 </div>
-                <div class="col-6 col-md-2">
-                    <label class="filter-label">Max Price</label>
-                    <input type="number" name="maxPrice" class="form-control form-control-sm"
-                           placeholder="Any" value="@ViewBag.CurrentMaxPrice" />
-                </div>
-                <div class="col-6 col-md-2">
-                    <button type="submit" class="btn btn-danger btn-sm w-100">
+                <div class="col-md-2 col-4">
+                    <button type="submit" class="btn btn-primary w-100">
                         <i class="bi bi-search me-1"></i>Filter
                     </button>
                 </div>
-            </div>
-            <!-- Preserve sort when submitting filter form -->
-            @if (!string.IsNullOrEmpty(currentSort) && currentSort != "recent")
-            {
-                <input type="hidden" name="sortBy" value="@currentSort" />
-            }
-        </form>
+            </form>
 
-        <!-- Sort Bar -->
-        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-            <div class="d-flex align-items-center gap-2">
-                <label class="text-muted small mb-0"><i class="bi bi-sort-down me-1"></i>Sort By:</label>
-                <div class="btn-group btn-group-sm" role="group">
-                    <a href="@SortUrl("recent")" class="btn @(currentSort == "recent" ? "btn-dark" : "btn-outline-secondary")">
-                        <i class="bi bi-clock me-1"></i>Recent
-                    </a>
-                    <a href="@SortUrl("price_asc")" class="btn @(currentSort == "price_asc" ? "btn-dark" : "btn-outline-secondary")">
-                        <i class="bi bi-sort-numeric-up me-1"></i>Price: Low to High
-                    </a>
-                    <a href="@SortUrl("price_desc")" class="btn @(currentSort == "price_desc" ? "btn-dark" : "btn-outline-secondary")">
-                        <i class="bi bi-sort-numeric-down me-1"></i>Price: High to Low
-                    </a>
+            <!-- Dynamic Sort Bar -->
+            <div class="mt-3 pt-3 border-top">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <span class="text-muted small fw-semibold"><i class="bi bi-sort-down me-1"></i>Sort By:</span>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-secondary sort-btn active" data-sort="default" onclick="sortProperties('default', this)">
+                            <i class="bi bi-shuffle me-1"></i>Default
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary sort-btn" data-sort="price" data-dir="asc" onclick="sortProperties('price', this)">
+                            <i class="bi bi-currency-dollar me-1"></i>Price <i class="bi bi-arrow-up sort-icon"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary sort-btn" data-sort="date" data-dir="desc" onclick="sortProperties('date', this)">
+                            <i class="bi bi-calendar me-1"></i>Date <i class="bi bi-arrow-down sort-icon"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary sort-btn" data-sort="area" data-dir="asc" onclick="sortProperties('area', this)">
+                            <i class="bi bi-arrows-angle-expand me-1"></i>Area <i class="bi bi-arrow-up sort-icon"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary sort-btn" data-sort="bedrooms" data-dir="desc" onclick="sortProperties('bedrooms', this)">
+                            <i class="bi bi-bed me-1"></i>Rooms <i class="bi bi-arrow-down sort-icon"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
-            @if (!string.IsNullOrEmpty(currentSort) && currentSort != "recent")
-            {
-                <a href="@SortUrl("recent")" class="btn btn-sm btn-link text-decoration-none text-muted">
-                    <i class="bi bi-arrow-counterclockwise me-1"></i>Reset Sort
-                </a>
-            }
         </div>
     </div>
 
-    <!-- PROPERTY CARDS -->
-    @if (!Model.Any())
-    {
-        <div class="text-center py-5">
-            <i class="bi bi-buildings display-1 text-muted opacity-25"></i>
-            <p class="mt-3 text-muted fs-5">No properties found.</p>
-            @if (role == "Owner")
-            {
-                <a asp-action="Create" class="btn btn-danger px-4">List Your First Property</a>
-            }
-        </div>
-    }
-    else
-    {
-        <div class="row g-4">
-            @foreach (var item in Model)
-            {
-                <div class="col-xl-4 col-md-6">
-                    <div class="prop-card">
-
-                        <!-- IMAGE -->
-                        <div class="prop-img-wrap">
-                            @{
-                                var img = item.Image?.FirstOrDefault();
-                            }
-                            @if (img != null)
-                            {
-                                <img src="@img.ImageURL" class="prop-img" alt="property" />
-                            }
-                            else
-                            {
-                                <div class="prop-img-placeholder">
-                                    <i class="bi bi-buildings"></i>
-                                </div>
-                            }
-
-                            <!-- Type badge -->
-                            <span class="prop-type-badge">@item.Type</span>
-
-                            <!-- Status badge -->
-                            <span class="prop-status-badge
-                                        @(item.Status == Sakany.Models.PropertyStatus.Available ? "badge-avail" :
-                                          item.Status == Sakany.Models.PropertyStatus.Rented    ? "badge-rented" : "badge-sold")">
-                                @item.Status
-                            </span>
-
-                            <!-- Wishlist button (Tenant only) -->
-                            @if (role == "Tenant")
-                            {
-                                var inWishlist = wishlistIds.Contains(item.ID);
-                                <a asp-controller="Wishlist"
-                                   asp-action="@(inWishlist ? "Remove" : "Add")"
-                                   asp-route-propertyId="@item.ID"
-                                   class="prop-heart @(inWishlist ? "hearted" : "")"
-                                   title="@(inWishlist ? "Remove from wishlist" : "Add to wishlist")">
-                                    <i class="bi @(inWishlist ? "bi-heart-fill" : "bi-heart")"></i>
-                                </a>
-                            }
-                        </div>
-
-                        <!-- BODY -->
-                        <div class="prop-body">
-                            <div class="d-flex justify-content-between align-items-start mb-1">
-                                <h5 class="prop-price mb-0">
-                                    EGP @item.Price.ToString("N0")
-                                    <span class="prop-per">/mo</span>
-                                </h5>
-                            </div>
-
-                            <p class="prop-address">
-                                <i class="bi bi-geo-alt-fill text-danger me-1"></i>@item.Address
-                            </p>
-                            <p class="text-muted small mb-3">
-                                <i class="bi bi-map me-1"></i>@item.City
-                                @if (role != "Tenant")
-                                {
-                                    <span class="ms-2 text-muted">&middot; Owner: <strong>@item.Owner?.Name</strong></span>
-                                }
-                            </p>
-
-                            <!-- Specs -->
-                            <div class="prop-specs">
-                                <span><i class="bi bi-door-open"></i> @item.BedRooms bd</span>
-                                <span><i class="bi bi-droplet"></i> @item.BathRooms ba</span>
-                                <span><i class="bi bi-arrows-fullscreen"></i> @item.Area m&sup2;</span>
-                                <span><i class="bi bi-person-check"></i> @item.AvailableRooms avail</span>
-                            </div>
-
-                            <!-- Amenities (small) -->
-                            @if (item.PropertyAmenity?.Any() == true)
-                            {
-                                <div class="prop-amenities">
-                                    @foreach (var pa in item.PropertyAmenity.Take(3))
-                                    {
-                                        <span class="amenity-tag">@pa.Amenity?.Name</span>
-                                    }
-                                    @if (item.PropertyAmenity.Count > 3)
-                                    {
-                                        <span class="amenity-tag">+@(item.PropertyAmenity.Count - 3) more</span>
-                                    }
-                                </div>
-                            }
-
-                            <!-- Actions -->
-                            <div class="prop-actions">
-                                <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-outline-danger btn-sm">
-                                    <i class="bi bi-eye me-1"></i>Details
-                                </a>
-                                @if (role == "Owner" || role == "Admin")
-                                {
-                                    <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-outline-secondary btn-sm">
-                                        <i class="bi bi-pencil me-1"></i>Edit
-                                    </a>
-                                    <a asp-action="Delete" asp-route-id="@item.ID" class="btn btn-outline-danger btn-sm">
-                                        <i class="bi bi-trash me-1"></i>Delete
-                                    </a>
-                                }
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            }
-        </div>
-
-        <!-- PAGINATION -->
-        @if (totalPages > 1)
+    <!-- Property Grid -->
+    <div id="propertyGrid">
+        @if (!Model.Any())
         {
-            <nav class="mt-4" aria-label="Page navigation">
-                <ul class="pagination justify-content-center">
-                    @if (currentPage > 1)
-                    {
-                        <li class="page-item">
-                            <a class="page-link" href="@PageUrl(currentPage - 1)">Previous</a>
-                        </li>
-                    }
-                    else
-                    {
-                        <li class="page-item disabled"><span class="page-link">Previous</span></li>
-                    }
-
-                    @for (int i = 1; i <= totalPages; i++)
-                    {
-                        if (i == currentPage)
-                        {
-                            <li class="page-item active"><span class="page-link">@i</span></li>
-                        }
-                        else
-                        {
-                            <li class="page-item"><a class="page-link" href="@PageUrl(i)">@i</a></li>
-                        }
-                    }
-
-                    @if (currentPage < totalPages)
-                    {
-                        <li class="page-item">
-                            <a class="page-link" href="@PageUrl(currentPage + 1)">Next</a>
-                        </li>
-                    }
-                    else
-                    {
-                        <li class="page-item disabled"><span class="page-link">Next</span></li>
-                    }
-                </ul>
-            </nav>
+            <div class="text-center py-5" id="emptyState">
+                <i class="bi bi-buildings display-1 text-muted"></i>
+                <h4 class="mt-3 text-muted">No properties found</h4>
+                <p class="text-muted">Try adjusting your filters or add a new listing.</p>
+            </div>
         }
-    }
+        else
+        {
+            <div class="row g-4" id="propertyList">
+                @foreach (var item in Model)
+                {
+                    var isMyProperty = item.OwnerID == Context.Session.GetString("UserID");
+                    var readOnly = isOwner && viewMode == "others";
+
+                    <div class="col-lg-4 col-md-6 property-card-item"
+                         data-price="@item.Price"
+                         data-date="@item.CreatedAt.Ticks"
+                         data-area="@item.Area"
+                         data-bedrooms="@item.BedRooms">
+                        <div class="card h-100 border-0 shadow-sm overflow-hidden property-card">
+                            <!-- Image -->
+                            <div class="position-relative" style="height: 220px; background: #f0f0f0;">
+                                @if (item.Image?.Any() == true)
+                                {
+                                    <img src="@item.Image.First().ImageURL" class="w-100 h-100 object-fit-cover" alt="Property photo" />
+                                }
+                                else
+                                {
+                                    <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
+                                        <i class="bi bi-image display-4"></i>
+                                    </div>
+                                }
+
+                                <div class="position-absolute top-0 start-0 m-2 d-flex gap-1">
+                                    <span class="badge bg-dark bg-opacity-75">@item.Type</span>
+                                    <span class="badge @(item.Status == PropertyStatus.Available ? "bg-success" : item.Status == PropertyStatus.Rented ? "bg-warning text-dark" : "bg-secondary")">
+                                        @item.Status
+                                    </span>
+                                </div>
+
+                                @if (readOnly)
+                                {
+                                    <div class="position-absolute top-0 end-0 m-2">
+                                        <span class="badge bg-info"><i class="bi bi-eye me-1"></i>Read Only</span>
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="card-body p-3 d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title mb-0 text-truncate" style="max-width: 75%;">@item.Address</h5>
+                                    <span class="fw-bold text-primary">@item.Price.ToString("C0")</span>
+                                </div>
+
+                                <p class="text-muted small mb-2"><i class="bi bi-geo-alt me-1"></i>@item.City</p>
+
+                                <div class="d-flex gap-3 text-muted small mb-3">
+                                    <span><i class="bi bi-bed me-1"></i>@item.BedRooms</span>
+                                    <span><i class="bi bi-droplet me-1"></i>@item.BathRooms</span>
+                                    <span><i class="bi bi-arrows-angle-expand me-1"></i>@item.Area m²</span>
+                                </div>
+
+                                <p class="card-text text-muted small flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                    @item.AvailableRooms rooms available · @item.Type in @item.City
+                                </p>
+
+                                <div class="d-flex gap-2 mt-auto pt-2 border-top">
+                                    <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-outline-primary btn-sm flex-grow-1">
+                                        <i class="bi bi-eye me-1"></i>View
+                                    </a>
+
+                                    @if (!readOnly && (isAdmin || isMyProperty))
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-outline-warning btn-sm">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@item.ID" class="btn btn-outline-danger btn-sm">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    }
+                                    else if (readOnly && userRole == "Tenant")
+                                    {
+                                        <a asp-controller="Requests" asp-action="Create" asp-route-propertyId="@item.ID" class="btn btn-primary btn-sm flex-grow-1">
+                                            <i class="bi bi-send me-1"></i>Request
+                                        </a>
+                                    }
+                                    else if (readOnly)
+                                    {
+                                        <span class="btn btn-outline-secondary btn-sm flex-grow-1 disabled">
+                                            <i class="bi bi-lock me-1"></i>Owner Only
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                            <div class="card-footer bg-white border-0 pt-0 pb-3 px-3">
+                                <small class="text-muted">
+                                    <i class="bi bi-person me-1"></i>Listed by @item.Owner?.Name
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
 </div>
 
-@section Styles {
-    <style>
-        .filter-bar {
-            background: #fff;
-            border-radius: 12px;
-            padding: 1rem 1.25rem;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-        }
-        .filter-label {
-            display: block;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #6c757d;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            margin-bottom: 0.25rem;
-        }
+<style>
+    .property-card { transition: transform 0.2s, box-shadow 0.2s; }
+    .property-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important; }
+    .object-fit-cover { object-fit: cover; }
+    .sort-btn.active { background: var(--bs-primary); color: white; border-color: var(--bs-primary); }
+    .sort-btn.active .sort-icon { display: inline-block !important; }
+    .sort-btn .sort-icon { display: none; }
+</style>
 
-        .prop-card {
-            background: #fff;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            transition: transform 0.2s, box-shadow 0.2s;
-            height: 100%;
-        }
-        .prop-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-        }
-        .prop-img-wrap {
-            position: relative;
-            height: 200px;
-            overflow: hidden;
-        }
-        .prop-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .prop-img-placeholder {
-            width: 100%;
-            height: 100%;
-            background: #e9ecef;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-            color: #adb5bd;
-        }
-        .prop-type-badge {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(26,26,46,0.85);
-            color: #fff;
-            font-size: 0.75rem;
-            font-weight: 600;
-            padding: 0.25rem 0.6rem;
-            border-radius: 6px;
-        }
-        .prop-status-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            padding: 0.2rem 0.5rem;
-            border-radius: 6px;
-        }
-        .badge-avail { background: #d4edda; color: #155724; }
-        .badge-rented { background: #fff3cd; color: #856404; }
-        .badge-sold { background: #f8d7da; color: #721c24; }
+@section Scripts {
+    <script>
+        function sortProperties(sortType, btn) {
+            // Update active state
+            document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
 
-        .prop-heart {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            width: 34px;
-            height: 34px;
-            background: rgba(255,255,255,0.9);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #6c757d;
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-        .prop-heart:hover, .prop-heart.hearted {
-            background: var(--sakany-primary);
-            color: #fff;
-        }
+            const list = document.getElementById('propertyList');
+            if (!list) return;
 
-        .prop-body {
-            padding: 1rem;
-        }
-        .prop-price {
-            color: var(--sakany-primary);
-            font-weight: 700;
-        }
-        .prop-per {
-            font-size: 0.8rem;
-            font-weight: 400;
-            color: #6c757d;
-        }
-        .prop-address {
-            font-size: 0.92rem;
-            margin-bottom: 0.25rem;
-            font-weight: 500;
-        }
-        .prop-specs {
-            display: flex;
-            gap: 1rem;
-            font-size: 0.82rem;
-            color: #6c757d;
-            border-top: 1px solid #e9ecef;
-            padding-top: 0.75rem;
-            margin-top: 0.75rem;
-        }
-        .prop-specs span {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
+            const cards = Array.from(list.querySelectorAll('.property-card-item'));
 
-        .prop-amenities {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.4rem;
-            margin-top: 0.5rem;
-            padding-top: 0.5rem;
-            border-top: 1px solid #e9ecef;
-        }
-        .amenity-tag {
-            background: #e9ecef;
-            color: #495057;
-            font-size: 0.72rem;
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-        }
+            if (sortType === 'default') {
+                // Reload original order from data attribute or just reload page
+                location.reload();
+                return;
+            }
 
-        .prop-actions {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 0.75rem;
+            let direction = btn.getAttribute('data-dir') || 'asc';
+            const icon = btn.querySelector('.sort-icon');
+
+            // Toggle direction on repeated clicks
+            if (btn.getAttribute('data-last-sort') === sortType) {
+                direction = direction === 'asc' ? 'desc' : 'asc';
+                btn.setAttribute('data-dir', direction);
+            } else {
+                // Reset all other buttons
+                document.querySelectorAll('.sort-btn').forEach(b => {
+                    if (b !== btn) b.setAttribute('data-last-sort', '');
+                });
+            }
+            btn.setAttribute('data-last-sort', sortType);
+
+            // Update icon
+            icon.className = direction === 'asc' ? 'bi bi-arrow-up sort-icon' : 'bi bi-arrow-down sort-icon';
+
+            cards.sort((a, b) => {
+                let valA, valB;
+
+                switch (sortType) {
+                    case 'price':
+                        valA = parseFloat(a.getAttribute('data-price'));
+                        valB = parseFloat(b.getAttribute('data-price'));
+                        break;
+                    case 'date':
+                        valA = parseInt(a.getAttribute('data-date'));
+                        valB = parseInt(b.getAttribute('data-date'));
+                        break;
+                    case 'area':
+                        valA = parseFloat(a.getAttribute('data-area'));
+                        valB = parseFloat(b.getAttribute('data-area'));
+                        break;
+                    case 'bedrooms':
+                        valA = parseInt(a.getAttribute('data-bedrooms'));
+                        valB = parseInt(b.getAttribute('data-bedrooms'));
+                        break;
+                    default:
+                        return 0;
+                }
+
+                if (direction === 'asc') {
+                    return valA - valB;
+                } else {
+                    return valB - valA;
+                }
+            });
+
+            // Re-append in sorted order with animation
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    list.appendChild(card);
+                    card.style.transition = 'all 0.3s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 50);
+            });
         }
-    </style>
+    </script>
 }

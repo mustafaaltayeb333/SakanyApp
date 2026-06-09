@@ -14,14 +14,17 @@ namespace Sakany.Controllers
         private readonly SakanyDbContext _context;
         private readonly PdfService _pdfService;
         private readonly EmailService _emailService;
+        private readonly INotificationService _notificationService;
 
         public RequestsController(SakanyDbContext context,
                                   PdfService pdfService,
-                                  EmailService emailService)
+                                  EmailService emailService,
+                                  INotificationService notificationService)
         {
             _context = context;
             _pdfService = pdfService;
             _emailService = emailService;
+            _notificationService = notificationService;
         }
 
         private string? SessionUserID => HttpContext.Session.GetString("UserID");
@@ -30,22 +33,6 @@ namespace Sakany.Controllers
         private bool IsAdmin => SessionRole == "Admin";
         private bool IsOwner => SessionRole == "Owner";
         private bool IsTenant => SessionRole == "Tenant";
-		
-		
-		// ── Send in-app notification ───────────────────────
-        private async Task Notify(string userId, string title, string body)
-        {
-            _context.Notification.Add(new Notification
-            {
-                ID = Guid.NewGuid().ToString(),
-                UserID = userId,
-                Title = title,
-                Body = body,
-                IsRead = false,
-                CreatedAt = DateTime.Now
-            });
-            await _context.SaveChangesAsync();
-        }
 
         // ── INDEX ─────────────────────────────────────────
         public async Task<IActionResult> Index(int pageNumber = 1)
@@ -65,7 +52,6 @@ namespace Sakany.Controllers
             else if (IsTenant)
                 query = query.Where(r => r.ClientID == SessionUserID);
 
-            // ── PAGINATION ────────────────────────────────
             var paginatedResult = await PaginatedList<Request>.CreateAsync(
                 query.OrderByDescending(r => r.Date), pageNumber, pageSize);
 
@@ -85,8 +71,12 @@ namespace Sakany.Controllers
             var request = await _context.Request
                 .Include(r => r.Client)
                 .Include(r => r.Property)
+                    .ThenInclude(p => p.Image)
+                .Include(r => r.Property)
                     .ThenInclude(p => p.Owner)
-                .FirstOrDefaultAsync(m => m.ID == id);
+                .Include(r => r.Contract)
+                .Include(r => r.Review)
+                .FirstOrDefaultAsync(r => r.ID == id);
 
             if (request == null) return NotFound();
 
@@ -168,13 +158,17 @@ namespace Sakany.Controllers
                 request.Status = RequestStatus.Pending;
                 _context.Add(request);
                 await _context.SaveChangesAsync();
-				
+
                 if (property?.OwnerID != null)
-                    await Notify(property.OwnerID,
-                        "🏠 New Rental Request",
-                        $"{HttpContext.Session.GetString("UserName")} requested your property at {property.Address}.");
-                
-				TempData["Success"] = "Rental request submitted!";
+                    await _notificationService.NotifyUserAsync(
+                        property.OwnerID,
+                        "New Rental Request",
+                        $"{HttpContext.Session.GetString("UserName")} requested your property at {property.Address}.",
+                        NotificationPriority.Normal,
+                        $"/Requests/Details/{request.ID}",
+                        "View Request");
+
+                TempData["Success"] = "Rental request submitted!";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -254,8 +248,8 @@ namespace Sakany.Controllers
                             return RedirectToAction(nameof(Index));
                         }
                     }
-					
-					// ══ APPROVE ═══════════════════════════════════
+
+                    // ══ APPROVE ═══════════════════════════════════
                     if (original.Status == RequestStatus.Pending &&
                         request.Status == RequestStatus.Approved)
                     {
@@ -294,7 +288,6 @@ namespace Sakany.Controllers
 
                             _context.Add(contract);
                             await _context.SaveChangesAsync();
-							
 
                             var fullContract = await _context.Contract
                                 .Include(c => c.Owner)
@@ -339,14 +332,22 @@ namespace Sakany.Controllers
                                     fullContract.Tenant.Name,
                                     subject, tenantBody,
                                     pdf, fileName);
-															// 3. In-app notifications
-								await Notify(original.ClientID,
-									"🎉 Request Approved!",
-									$"Your request for {property.Address} is approved. A contract has been created and emailed to you.");
-								await Notify(property.OwnerID,
-									"✅ Request Approved",
-									$"You approved a request for {property.Address}. Contract generated and emailed.");
 
+                                await _notificationService.NotifyUserAsync(
+                                    original.ClientID,
+                                    "Request Approved!",
+                                    $"Your request for {property.Address} is approved. A contract has been created and emailed to you.",
+                                    NotificationPriority.High,
+                                    $"/Requests/Details/{original.ID}",
+                                    "View Details");
+
+                                await _notificationService.NotifyUserAsync(
+                                    property.OwnerID,
+                                    "Request Approved",
+                                    $"You approved a request for {property.Address}. Contract generated and emailed.",
+                                    NotificationPriority.Normal,
+                                    $"/Requests/Details/{original.ID}",
+                                    "View Details");
                             }
                             catch (Exception ex)
                             {
@@ -355,19 +356,21 @@ namespace Sakany.Controllers
                             }
                         }
                     }
-					
-					// ══ REJECT ════════════════════════════════════
-					if (original.Status == RequestStatus.Pending && request.Status == RequestStatus.Rejected)
-					{
-						var property = await _context.Property.FindAsync(original.PropertyID);
-						await Notify(original.ClientID,
-							"❌ Request Rejected",
-							$"Your request for {property?.Address ?? "a property"} was rejected by the owner.");
 
-						TempData["Success"] = "Request rejected.";
-					}
+                    // ══ REJECT ════════════════════════════════════
+                    if (original.Status == RequestStatus.Pending && request.Status == RequestStatus.Rejected)
+                    {
+                        var property = await _context.Property.FindAsync(original.PropertyID);
+                        await _notificationService.NotifyUserAsync(
+                            original.ClientID,
+                            "Request Rejected",
+                            $"Your request for {property?.Address ?? "a property"} was rejected by the owner.",
+                            NotificationPriority.High,
+                            $"/Requests/Details/{original.ID}",
+                            "View Details");
 
-					
+                        TempData["Success"] = "Request rejected.";
+                    }
 
                     request.ClientID = original.ClientID;
                     request.PropertyID = original.PropertyID;
@@ -376,7 +379,7 @@ namespace Sakany.Controllers
                     _context.Update(request);
                     await _context.SaveChangesAsync();
 
-                    if (TempData["Warning"] == null)
+                    if (TempData["Warning"] == null && TempData["Success"] == null)
                         TempData["Success"] = $"Request marked as {request.Status}.";
                 }
                 catch (DbUpdateConcurrencyException)

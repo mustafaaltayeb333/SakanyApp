@@ -127,8 +127,13 @@ namespace Sakany.Migrations
             modelBuilder.Entity("Sakany.Models.Notification", b =>
                 {
                     b.Property<string>("ID")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ActionText")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ActionUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Body")
                         .IsRequired()
@@ -139,6 +144,16 @@ namespace Sakany.Migrations
 
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
+
+                    b.Property<string>("NotificationType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -22398,7 +22413,7 @@ namespace Sakany.Migrations
                             ID = "O1",
                             Email = "ahmed@example.com",
                             Name = "Ahmed Owner",
-                            Password = "hashed_pass",
+                            Password = "AQAAAAIAAYagAAAAEFw4GB7+jY88+9xHhM7vLbK03aMKo8bw79vvOoI6mVmmWPvHkF5GkpZMDJMIOW89Tw==",
                             Phone = "01012345678",
                             Role = 1
                         },
@@ -22407,7 +22422,7 @@ namespace Sakany.Migrations
                             ID = "O2",
                             Email = "sara@example.com",
                             Name = "Sara Owner",
-                            Password = "hashed_pass",
+                            Password = "AQAAAAIAAYagAAAAELKh53lolm/uTrHlDOl27u0KTI14emNpiRpStXmgJvfp5j2xvFMi7abwoeCXZ1s5lw==",
                             Phone = "01012345679",
                             Role = 1
                         },
@@ -22416,7 +22431,7 @@ namespace Sakany.Migrations
                             ID = "O3",
                             Email = "mona@example.com",
                             Name = "Mona Owner",
-                            Password = "hashed_pass",
+                            Password = "AQAAAAIAAYagAAAAEPw6OzwUVg17yX6unfUR433ZrDBjLg39eNXJT6kOBMiCwo33E7XQdQLgSxHDzjbQDg==",
                             Phone = "01012345680",
                             Role = 1
                         },
@@ -22425,7 +22440,7 @@ namespace Sakany.Migrations
                             ID = "O4",
                             Email = "omar@example.com",
                             Name = "Omar Owner",
-                            Password = "hashed_pass",
+                            Password = "AQAAAAIAAYagAAAAEI/GqPsNc2JHl/fR5rvEntlZ0u8Lz4OOwbJsF4uO7tp2Ln4yCV8p2NnPv9+Wq34YpA==",
                             Phone = "01012345681",
                             Role = 1
                         },
@@ -22434,7 +22449,7 @@ namespace Sakany.Migrations
                             ID = "O5",
                             Email = "zain@example.com",
                             Name = "Zain Owner",
-                            Password = "hashed_pass",
+                            Password = "AQAAAAIAAYagAAAAEM/56WTxql7B+r0S8EHKCkbirMbhKVCSb5DvdzGWigPD3FtU0QsTDxANzdECHHQ0tw==",
                             Phone = "01012345682",
                             Role = 1
                         },
@@ -22443,9 +22458,9 @@ namespace Sakany.Migrations
                             ID = "O6",
                             Email = "admin@example.com",
                             Name = "Jose Gonzales",
-                            Password = "hashed_pass",
+                            Password = "AQAAAAIAAYagAAAAEBbXB4BxOxgwG6oyaU3lWh0vIURhCV8I5rPYVK1W5kDUO0N4YRwj/e3+ouZU5xad5Q==",
                             Phone = "01012345682",
-                            Role = 1
+                            Role = 0
                         });
                 });
 

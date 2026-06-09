@@ -2,34 +2,33 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Sakany.Data;
 using Sakany.Models;
+using Sakany.Services;
 
 namespace Sakany.Controllers
 {
     public class AccountController : Controller
     {
         private readonly SakanyDbContext _context;
+        private readonly PasswordHasher _passwordHasher;
 
         public AccountController(SakanyDbContext context)
         {
             _context = context;
+            _passwordHasher = new PasswordHasher();
         }
 
-        // GET: Account/Login
-        [HttpGet]
-        public IActionResult Login(string? returnUrl = null)
+        // ── LOGIN GET ─────────────────────────────────────
+        public IActionResult Login()
         {
-            // Already logged in -> redirect
             if (HttpContext.Session.GetString("UserID") != null)
                 return RedirectToAction("Index", "Home");
-
-            ViewBag.ReturnUrl = returnUrl;
             return View();
         }
 
-        // POST: Account/Login
+        // ── LOGIN POST ────────────────────────────────────
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(string email, string password, string? returnUrl = null)
+        public async Task<IActionResult> Login(string email, string password)
         {
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             {
@@ -38,7 +37,7 @@ namespace Sakany.Controllers
             }
 
             var user = await _context.User
-                .FirstOrDefaultAsync(u => u.Email == email && u.Password == password);
+                .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
 
             if (user == null)
             {
@@ -46,188 +45,187 @@ namespace Sakany.Controllers
                 return View();
             }
 
-            // Store session
+            // SECURE: Verify hashed password instead of plain-text comparison
+            bool isValid = _passwordHasher.VerifyPassword(user, user.Password, password);
+
+            if (!isValid)
+            {
+                ModelState.AddModelError("", "Invalid email or password.");
+                return View();
+            }
+
+            // Rehash if needed (algorithm upgrade path)
+            if (_passwordHasher.NeedsRehash(user, user.Password, password))
+            {
+                user.Password = _passwordHasher.HashPassword(user, password);
+                _context.Update(user);
+                await _context.SaveChangesAsync();
+            }
+
+            // Establish session
             HttpContext.Session.SetString("UserID", user.ID);
-            HttpContext.Session.SetString("UserName", user.Name);
             HttpContext.Session.SetString("UserRole", user.Role.ToString());
-            HttpContext.Session.SetString("UserEmail", user.Email);
+            HttpContext.Session.SetString("UserName", user.Name);
+			HttpContext.Session.SetString("UserEmail", user.Email);
 
             TempData["Success"] = $"Welcome back, {user.Name}!";
-
-            // Role-based redirect
-            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                return Redirect(returnUrl);
-
-            return user.Role switch
-            {
-                UserRole.Admin => RedirectToAction("Index", "Dashboard"),
-                UserRole.Owner => RedirectToAction("Index", "Property"),
-                _ => RedirectToAction("Index", "Home")
-            };
+            return RedirectToAction("Index", "Home");
         }
 
-        // GET: Account/Register
-        [HttpGet]
+        // ── REGISTER GET ──────────────────────────────────
         public IActionResult Register()
         {
             if (HttpContext.Session.GetString("UserID") != null)
                 return RedirectToAction("Index", "Home");
-
             return View();
         }
 
-        // POST: Account/Register
+        // ── REGISTER POST ─────────────────────────────────
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(string name, string email, string password,
-                                                   string phone, UserRole role)
+        public async Task<IActionResult> Register([Bind("Name,Email,Password,Phone,Role")] User user)
         {
-            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(email) ||
-                string.IsNullOrWhiteSpace(password))
-            {
-                ModelState.AddModelError("", "Name, email, and password are required.");
-                return View();
-            }
+            ModelState.Remove("ID");
 
-            if (password.Length < 6)
-            {
-                ModelState.AddModelError("", "Password must be at least 6 characters.");
-                return View();
-            }
-
-            var emailExists = await _context.User.AnyAsync(u => u.Email == email);
+            // Validate email uniqueness
+            var emailExists = await _context.User
+                .AnyAsync(u => u.Email.ToLower() == user.Email.ToLower());
             if (emailExists)
             {
-                ModelState.AddModelError("", "An account with this email already exists.");
-                return View();
+                ModelState.AddModelError("Email", "An account with this email already exists.");
             }
 
-            // Prevent registering as Admin through the form
-            if (role == UserRole.Admin)
-                role = UserRole.Tenant;
-
-            var user = new User
+            // Validate phone uniqueness
+            var phoneExists = await _context.User
+                .AnyAsync(u => u.Phone == user.Phone);
+            if (phoneExists)
             {
-                ID = Guid.NewGuid().ToString(),
-                Name = name.Trim(),
-                Email = email.Trim().ToLower(),
-                Password = password,
-                Phone = phone?.Trim() ?? "",
-                Role = role
-            };
+                ModelState.AddModelError("Phone", "An account with this phone number already exists.");
+            }
 
-            _context.User.Add(user);
-            await _context.SaveChangesAsync();
+            if (ModelState.IsValid)
+            {
+                user.ID = Guid.NewGuid().ToString();
+                
+                // SECURE: Hash password before storage
+                user.Password = _passwordHasher.HashPassword(user, user.Password);
 
-            // Auto login after register
-            HttpContext.Session.SetString("UserID", user.ID);
-            HttpContext.Session.SetString("UserName", user.Name);
-            HttpContext.Session.SetString("UserRole", user.Role.ToString());
-            HttpContext.Session.SetString("UserEmail", user.Email);
+                _context.Add(user);
+                await _context.SaveChangesAsync();
 
-            TempData["Success"] = $"Account created successfully! Welcome, {user.Name}!";
-            return RedirectToAction("Index", "Home");
+                TempData["Success"] = "Registration successful! Please log in.";
+                return RedirectToAction(nameof(Login));
+            }
+
+            return View(user);
         }
 
-        // POST: Account/Logout
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        // ── LOGOUT ────────────────────────────────────────
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
-            TempData["Success"] = "You have been logged out.";
+            TempData["Success"] = "You have been logged out successfully.";
             return RedirectToAction("Index", "Home");
         }
 
-        // GET: Account/Profile
+        // ── PROFILE ───────────────────────────────────────
         public async Task<IActionResult> Profile()
         {
             var userId = HttpContext.Session.GetString("UserID");
-            if (userId == null)
-                return RedirectToAction("Login");
+            if (string.IsNullOrEmpty(userId))
+                return RedirectToAction(nameof(Login));
 
-            var user = await _context.User
-                .Include(u => u.OwnedProperties)
-                .Include(u => u.ClientRequests)
-                    .ThenInclude(r => r.Property)
-                .Include(u => u.Reviews)
-                .Include(u => u.Wishlists)
-                    .ThenInclude(w => w.Property)
-                .FirstOrDefaultAsync(u => u.ID == userId);
-
-            if (user == null)
-            {
-                HttpContext.Session.Clear();
-                return RedirectToAction("Login");
-            }
+            var user = await _context.User.FindAsync(userId);
+            if (user == null) return NotFound();
 
             return View(user);
         }
 
-        // GET: Account/EditProfile
-        [HttpGet]
+        // ── EDIT PROFILE GET ──────────────────────────────
         public async Task<IActionResult> EditProfile()
         {
             var userId = HttpContext.Session.GetString("UserID");
-            if (userId == null)
-                return RedirectToAction("Login");
+            if (string.IsNullOrEmpty(userId))
+                return RedirectToAction(nameof(Login));
 
             var user = await _context.User.FindAsync(userId);
-            if (user == null)
-            {
-                HttpContext.Session.Clear();
-                return RedirectToAction("Login");
-            }
+            if (user == null) return NotFound();
 
+            // Don't send password hash to view
+            user.Password = string.Empty;
             return View(user);
         }
 
-        // POST: Account/EditProfile
+        // ── EDIT PROFILE POST ─────────────────────────────
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditProfile(string name, string phone, string? newPassword)
+        public async Task<IActionResult> EditProfile([Bind("ID,Name,Email,Phone")] User updatedUser, string? currentPassword, string? newPassword, string? confirmPassword)
         {
             var userId = HttpContext.Session.GetString("UserID");
-            if (userId == null)
-                return RedirectToAction("Login");
+            if (string.IsNullOrEmpty(userId) || userId != updatedUser.ID)
+                return RedirectToAction(nameof(Login));
 
             var user = await _context.User.FindAsync(userId);
-            if (user == null)
+            if (user == null) return NotFound();
+
+            // Check email uniqueness (excluding self)
+            var emailExists = await _context.User
+                .AnyAsync(u => u.Email.ToLower() == updatedUser.Email.ToLower() && u.ID != userId);
+            if (emailExists)
             {
-                HttpContext.Session.Clear();
-                return RedirectToAction("Login");
+                ModelState.AddModelError("Email", "This email is already in use.");
             }
 
-            // Validate name
-            if (string.IsNullOrWhiteSpace(name))
+            // Check phone uniqueness (excluding self)
+            var phoneExists = await _context.User
+                .AnyAsync(u => u.Phone == updatedUser.Phone && u.ID != userId);
+            if (phoneExists)
             {
-                ModelState.AddModelError("", "Name is required.");
-                return View(user);
+                ModelState.AddModelError("Phone", "This phone number is already in use.");
             }
 
-            user.Name = name.Trim();
-
-            if (!string.IsNullOrWhiteSpace(phone))
-                user.Phone = phone.Trim();
-
+            // Password change logic
             if (!string.IsNullOrWhiteSpace(newPassword))
             {
-                if (newPassword.Length < 6)
+                if (string.IsNullOrWhiteSpace(currentPassword))
                 {
-                    ModelState.AddModelError("", "Password must be at least 6 characters.");
-                    return View(user);
+                    ModelState.AddModelError("currentPassword", "Current password is required to set a new password.");
                 }
-                user.Password = newPassword;
+                else if (!_passwordHasher.VerifyPassword(user, user.Password, currentPassword))
+                {
+                    ModelState.AddModelError("currentPassword", "Current password is incorrect.");
+                }
+                else if (newPassword != confirmPassword)
+                {
+                    ModelState.AddModelError("confirmPassword", "New passwords do not match.");
+                }
+                else if (newPassword.Length < 6)
+                {
+                    ModelState.AddModelError("newPassword", "Password must be at least 6 characters.");
+                }
+                else
+                {
+                    // SECURE: Hash new password
+                    user.Password = _passwordHasher.HashPassword(user, newPassword);
+                }
             }
 
-            _context.Update(user);
-            await _context.SaveChangesAsync();
+            if (ModelState.IsValid)
+            {
+                user.Name = updatedUser.Name;
+                user.Email = updatedUser.Email;
+                user.Phone = updatedUser.Phone;
 
-            // Update session name
-            HttpContext.Session.SetString("UserName", user.Name);
+                _context.Update(user);
+                await _context.SaveChangesAsync();
 
-            TempData["Success"] = "Profile updated successfully.";
-            return RedirectToAction("Profile");
+                TempData["Success"] = "Profile updated successfully.";
+                return RedirectToAction(nameof(Profile));
+            }
+
+            // Repopulate for view
+            updatedUser.Password = string.Empty;
+            return View(updatedUser);
         }
     }
 }
