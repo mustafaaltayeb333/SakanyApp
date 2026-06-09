@@ -1,11 +1,22 @@
 @inject Sakany.Data.SakanyDbContext _dbContext
+@inject Sakany.Services.INotificationService _notificationService
 @{
     int unreadNotificationCount = 0;
+    List<Sakany.Models.Notification> recentNotifications = new();
     var currentUserId = Context.Session.GetString("UserID");
+    var currentUserRole = Context.Session.GetString("UserRole");
+    
     if (!string.IsNullOrEmpty(currentUserId))
     {
         unreadNotificationCount = await _dbContext.Notification
             .CountAsync(n => n.UserID == currentUserId && !n.IsRead);
+        
+        recentNotifications = await _dbContext.Notification
+            .Where(n => n.UserID == currentUserId)
+            .OrderByDescending(n => n.Priority)
+            .ThenByDescending(n => n.CreatedAt)
+            .Take(5)
+            .ToListAsync();
     }
 }
 <!DOCTYPE html>
@@ -163,6 +174,101 @@
             display: block;
         }
 
+        /* ── NOTIFICATION DROPDOWN ── */
+        .notification-dropdown {
+            width: 360px;
+            max-height: 480px;
+            overflow-y: auto;
+            padding: 0;
+        }
+
+        .notification-item {
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.15s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .notification-item:hover {
+            background: #f8f9fa;
+        }
+
+        .notification-item.unread {
+            background: #fff8f8;
+            border-left: 3px solid var(--sakany-primary);
+        }
+
+        .notification-item.unread:hover {
+            background: #fef2f2;
+        }
+
+        .notification-item .notif-title {
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+            color: #1a1a2e;
+        }
+
+        .notification-item.unread .notif-title {
+            color: var(--sakany-primary);
+        }
+
+        .notification-item .notif-body {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-bottom: 0.25rem;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .notification-item .notif-meta {
+            font-size: 0.75rem;
+            color: #adb5bd;
+        }
+
+        .notification-item .notif-priority {
+            font-size: 0.65rem;
+            padding: 0.15em 0.5em;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .priority-urgent { background: #f8d7da; color: #721c24; }
+        .priority-high { background: #fff3cd; color: #856404; }
+        .priority-normal { background: #d1ecf1; color: #0c5460; }
+        .priority-low { background: #e2e3e5; color: #383d41; }
+
+        .notification-dropdown .dropdown-header {
+            padding: 0.875rem 1rem;
+            font-weight: 600;
+            color: #1a1a2e;
+            background: #fff;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .notification-dropdown .dropdown-footer {
+            padding: 0.75rem 1rem;
+            text-align: center;
+            position: sticky;
+            bottom: 0;
+            background: #fff;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .notification-dropdown .empty-state {
+            padding: 2.5rem 1rem;
+            text-align: center;
+            color: #adb5bd;
+        }
+
         /* ── ALERTS ── */
         .global-alert {
             border-radius: 0;
@@ -243,6 +349,9 @@
         .badge-available { background: #d4edda; color: #155724; }
         .badge-rented { background: #fff3cd; color: #856404; }
         .badge-sold { background: #f8d7da; color: #721c24; }
+		.sort-btn.active { background: var(--sakany-primary) !important; color: white !important; border-color: var(--sakany-primary) !important; }
+		.sort-btn.active .sort-icon { display: inline-block !important; }
+		.sort-btn .sort-icon { display: none; }
     </style>
 </head>
 <body>
@@ -264,30 +373,30 @@
                 <!-- Left links -->
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link" asp-controller="Home" asp-action="Index">
+                        <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" ? "active" : "")" asp-controller="Home" asp-action="Index">
                             <i class="bi bi-house me-1"></i>Home
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" asp-controller="Property" asp-action="Index">
+                        <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Property" ? "active" : "")" asp-controller="Property" asp-action="Index">
                             <i class="bi bi-buildings me-1"></i>Properties
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" asp-controller="Requests" asp-action="Index">
+                        <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Requests" ? "active" : "")" asp-controller="Requests" asp-action="Index">
                             <i class="bi bi-file-text me-1"></i>Requests
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" asp-controller="Reviews" asp-action="Index">
+                        <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Reviews" ? "active" : "")" asp-controller="Reviews" asp-action="Index">
                             <i class="bi bi-star me-1"></i>Reviews
                         </a>
                     </li>
 
-                    @if (Context.Session.GetString("UserRole") == "Admin")
+                    @if (currentUserRole == "Admin")
                     {
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <a class="nav-link dropdown-toggle @(new[]{"Dashboard","User","Report","Notifications","Contract","Amenity","Messages"}.Contains(ViewContext.RouteData.Values["Controller"]?.ToString()) ? "active" : "")" href="#" role="button" data-bs-toggle="dropdown">
                                 <i class="bi bi-speedometer2 me-1"></i>Admin
                             </a>
                             <ul class="dropdown-menu">
@@ -305,10 +414,10 @@
 
                 <!-- Right side -->
                 <ul class="navbar-nav ms-auto align-items-center gap-2">
-                    @if (Context.Session.GetString("UserID") != null)
+                    @if (!string.IsNullOrEmpty(currentUserId))
                     {
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Wishlist" asp-action="Index">
+                            <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Wishlist" ? "active" : "")" asp-controller="Wishlist" asp-action="Index">
                                 <i class="bi bi-heart me-1"></i>Wishlist
                             </a>
                         </li>
@@ -321,18 +430,56 @@
                             </a>
                         </li>
 
-                        <!-- NOTIFICATIONS with badge -->
-                        <li class="nav-item">
-                            <a class="nav-icon-btn position-relative" asp-controller="Notifications" asp-action="Index" title="Notifications" id="notifLink">
+                        <!-- NOTIFICATIONS DROPDOWN -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-icon-btn dropdown-toggle no-caret" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Notifications" id="notifDropdownToggle">
                                 <i class="bi bi-bell"></i>
-                                @if (unreadNotificationCount > 0)
-                                {
-                                    <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle"
-                                          style="font-size: 0.6rem; padding: 0.25em 0.5em;">
-                                        @unreadNotificationCount
-                                    </span>
-                                }
+                                <span class="nav-badge @(unreadNotificationCount > 0 ? "show" : "")" id="notifBadge">@(unreadNotificationCount > 0 ? unreadNotificationCount.ToString() : "")</span>
                             </a>
+                            <div class="dropdown-menu dropdown-menu-end notification-dropdown shadow-lg" aria-labelledby="notifDropdownToggle">
+                                <div class="dropdown-header d-flex justify-content-between align-items-center">
+                                    <span><i class="bi bi-bell-fill me-2 text-primary"></i>Notifications</span>
+                                    @if (unreadNotificationCount > 0)
+                                    {
+                                        <button type="button" class="btn btn-link btn-sm text-decoration-none p-0" onclick="markAllNotificationsRead(event)">
+                                            <small>Mark all read</small>
+                                        </button>
+                                    }
+                                </div>
+                                <div id="notificationListContainer">
+                                    @if (!recentNotifications.Any())
+                                    {
+                                        <div class="empty-state">
+                                            <i class="bi bi-bell-slash display-6 d-block mb-2"></i>
+                                            <p class="mb-0 small">No notifications yet</p>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var notif in recentNotifications)
+                                        {
+                                            <a class="notification-item @(notif.IsRead ? "" : "unread")" href="@(notif.ActionUrl ?? $"/Notifications/Details/{notif.ID}")" onclick="markNotificationRead('@notif.ID', event)">
+                                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                                    <span class="notif-title">@notif.Title</span>
+                                                    <span class="notif-priority priority-@(notif.Priority == 3 ? "urgent" : notif.Priority == 2 ? "high" : notif.Priority == 1 ? "normal" : "low")">
+                                                        @(notif.Priority == 3 ? "!" : notif.Priority == 2 ? "!!" : "")
+                                                    </span>
+                                                </div>
+                                                <p class="notif-body mb-1">@notif.Body</p>
+                                                <div class="notif-meta d-flex justify-content-between">
+                                                    <span><i class="bi bi-clock me-1"></i>@notif.TimeAgo</span>
+                                                    <span class="badge bg-secondary" style="font-size: 0.65rem;">@notif.NotificationType</span>
+                                                </div>
+                                            </a>
+                                        }
+                                    }
+                                </div>
+                                <div class="dropdown-footer">
+                                    <a asp-controller="Notifications" asp-action="Index" class="btn btn-outline-primary btn-sm w-100">
+                                        <i class="bi bi-list me-1"></i>View All Notifications
+                                    </a>
+                                </div>
+                            </div>
                         </li>
 
                         <!-- USER DROPDOWN -->
@@ -347,12 +494,12 @@
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li class="dropdown-header text-muted small">
                                     @Context.Session.GetString("UserEmail")
-                                    <span class="badge bg-secondary ms-1">@Context.Session.GetString("UserRole")</span>
+                                    <span class="badge bg-secondary ms-1">@currentUserRole</span>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile"><i class="bi bi-person me-2"></i>My Profile</a></li>
                                 <li><a class="dropdown-item" asp-controller="Wishlist" asp-action="Index"><i class="bi bi-heart me-2"></i>My Wishlist</a></li>
-                                @if (Context.Session.GetString("UserRole") == "Admin")
+                                @if (currentUserRole == "Admin")
                                 {
                                     <li><a class="dropdown-item" asp-controller="Dashboard" asp-action="Index"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
                                 }
@@ -460,6 +607,81 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <!-- NOTIFICATION SCRIPTS -->
+    <script>
+        // Mark single notification as read
+        async function markNotificationRead(id, event) {
+            // Don't prevent default - let the link navigate
+            // But fire the AJAX request in background
+            fetch('/Notifications/MarkAsRead', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                },
+                body: `id=${encodeURIComponent(id)}`
+            }).then(() => refreshNotificationBadge());
+        }
+
+        // Mark all notifications as read
+        async function markAllNotificationsRead(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            fetch('/Notifications/MarkAllAsRead', {
+                method: 'POST',
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove unread styling from all items
+                    document.querySelectorAll('.notification-item.unread').forEach(el => {
+                        el.classList.remove('unread');
+                    });
+                    refreshNotificationBadge();
+                }
+            });
+        }
+
+        // Refresh notification badge count
+        function refreshNotificationBadge() {
+            fetch('/Notifications/GetUnreadCount')
+                .then(r => r.json())
+                .then(data => {
+                    const badge = document.getElementById('notifBadge');
+                    if (data.count > 0) {
+                        badge.textContent = data.count > 99 ? '99+' : data.count;
+                        badge.classList.add('show');
+                    } else {
+                        badge.textContent = '';
+                        badge.classList.remove('show');
+                    }
+                });
+        }
+
+        // Poll for new notifications every 30 seconds
+        setInterval(refreshNotificationBadge, 30000);
+
+        // Prevent dropdown toggle from closing when clicking inside
+        document.querySelector('.notification-dropdown')?.addEventListener('click', function(e) {
+            if (e.target.closest('a') || e.target.closest('button')) {
+                // Allow normal behavior for links and buttons
+                return;
+            }
+            e.stopPropagation();
+        });
+
+        // Message badge polling (placeholder for future message service)
+        function refreshMessageBadge() {
+            // TODO: Implement when messaging service is built
+            // fetch('/Messages/GetUnreadCount').then(...)
+        }
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

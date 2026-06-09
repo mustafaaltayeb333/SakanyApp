@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "8yd3q1e3+bw=",
+  "dgSpecHash": "BOySWUhVRM4=",
   "success": true,
-  "projectFilePath": "E:\\IT 230\\Level 3\\2nd term\\WDT Project\\Projects\\Versions\\Kimi\\SakanyApp\\Sakany.csproj",
+  "projectFilePath": "E:\\IT 230\\Level 3\\2nd term\\WDT Project\\Projects\\SakanyApp\\Sakany.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\BR\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\BR\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",

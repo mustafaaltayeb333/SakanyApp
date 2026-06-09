@@ -1,42 +1,457 @@
 ﻿@model Sakany.Models.Request
-
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Request Details";
+    var userRole = Context.Session.GetString("UserRole");
+    var userId = Context.Session.GetString("UserID");
+    var isAdmin = userRole == "Admin";
+    var isOwner = userRole == "Owner";
+    var isTenant = userRole == "Tenant";
+    var canManage = isAdmin || (isOwner && Model.Property?.OwnerID == userId);
+    var statusClass = Model.Status switch
+    {
+        RequestStatus.Pending => "bg-warning text-dark",
+        RequestStatus.Approved => "bg-success",
+        RequestStatus.Rejected => "bg-danger",
+        _ => "bg-secondary"
+    };
 }
 
-<h1>Details</h1>
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Requests</a></li>
+            <li class="breadcrumb-item active">Details</li>
+        </ol>
+    </nav>
 
-<div>
-    <h4>Request</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Date)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Date)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Status)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Client)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Client.ID)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Property)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Property.ID)
-        </dd>
-    </dl>
+    <!-- Header Card -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+                <div>
+                    <div class="d-flex align-items-center gap-3 mb-2">
+                        <h2 class="mb-0">Request #@Model.ID[..8]</h2>
+                        <span class="badge @statusClass fs-6 px-3 py-2">
+                            <i class="bi bi-circle-fill me-1 small"></i>@Model.Status
+                        </span>
+                    </div>
+                    <p class="text-muted mb-0">
+                        <i class="bi bi-calendar me-1"></i>Submitted @Model.Date.ToString("MMM dd, yyyy HH:mm")
+                        <span class="mx-2">|</span>
+                        <i class="bi bi-clock me-1"></i>@((DateTime.Now - Model.Date).Days)d ago
+                    </p>
+                </div>
+                <div class="d-flex gap-2">
+                    @if (canManage && Model.Status == RequestStatus.Pending)
+                    {
+                        <form asp-action="Edit" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@Model.ID" />
+                            <input type="hidden" name="Status" value="@RequestStatus.Approved" />
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-lg me-1"></i>Approve
+                            </button>
+                        </form>
+                        <form asp-action="Edit" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@Model.ID" />
+                            <input type="hidden" name="Status" value="@RequestStatus.Rejected" />
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-x-lg me-1"></i>Reject
+                            </button>
+                        </form>
+                    }
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Back
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Left Column: Client & Property -->
+        <div class="col-lg-8">
+            <!-- Client Profile Card -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+                    <h5 class="mb-0"><i class="bi bi-person-badge me-2 text-primary"></i>Client Profile</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-2 text-center mb-3 mb-md-0">
+                            <div class="client-avatar mx-auto">
+                                @(Model.Client?.Name?[0].ToString().ToUpper() ?? "U")
+                            </div>
+                        </div>
+                        <div class="col-md-5 mb-3 mb-md-0">
+                            <h5 class="mb-1">@Model.Client?.Name</h5>
+                            <p class="text-muted mb-2"><span class="badge bg-light text-dark border">@Model.Client?.Role</span></p>
+                            <div class="d-flex flex-column gap-1 small">
+                                <span><i class="bi bi-envelope me-2 text-muted"></i>@Model.Client?.Email</span>
+                                <span><i class="bi bi-telephone me-2 text-muted"></i>@Model.Client?.Phone</span>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="row g-2 text-center">
+                                <div class="col-4">
+                                    <div class="p-2 bg-light rounded">
+                                        <div class="fw-bold text-primary fs-5">@(Model.Client?.ClientRequests?.Count ?? 0)</div>
+                                        <small class="text-muted">Requests</small>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="p-2 bg-light rounded">
+                                        <div class="fw-bold text-success fs-5">@(Model.Client?.Reviews?.Count ?? 0)</div>
+                                        <small class="text-muted">Reviews</small>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="p-2 bg-light rounded">
+                                        <div class="fw-bold text-info fs-5">@(Model.Client?.TenantContracts?.Count ?? 0)</div>
+                                        <small class="text-muted">Contracts</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Property Details Card -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+                    <h5 class="mb-0"><i class="bi bi-building me-2 text-primary"></i>Property Details</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-5">
+                            @if (Model.Property?.Image?.Any() == true)
+                            {
+                                <img src="@Model.Property.Image.First().ImageURL" class="w-100 rounded" style="height: 220px; object-fit: cover;" alt="Property" />
+                            }
+                            else
+                            {
+                                <div class="w-100 rounded bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
+                                    <i class="bi bi-image display-4 text-muted"></i>
+                                </div>
+                            }
+                        </div>
+                        <div class="col-md-7">
+                            <h4 class="mb-2">@Model.Property?.Address</h4>
+                            <p class="text-muted mb-3"><i class="bi bi-geo-alt me-1"></i>@Model.Property?.City</p>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-6">
+                                    <div class="d-flex align-items-center gap-2 p-2 bg-light rounded">
+                                        <i class="bi bi-currency-dollar text-primary fs-4"></i>
+                                        <div>
+                                            <div class="fw-bold">@Model.Property?.Price.ToString("C0")</div>
+                                            <small class="text-muted">Price</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="d-flex align-items-center gap-2 p-2 bg-light rounded">
+                                        <i class="bi bi-house-door text-primary fs-4"></i>
+                                        <div>
+                                            <div class="fw-bold">@Model.Property?.Type</div>
+                                            <small class="text-muted">Type</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="d-flex align-items-center gap-2 p-2 bg-light rounded">
+                                        <i class="bi bi-bed text-primary"></i>
+                                        <div>
+                                            <div class="fw-bold">@Model.Property?.BedRooms</div>
+                                            <small class="text-muted">Beds</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="d-flex align-items-center gap-2 p-2 bg-light rounded">
+                                        <i class="bi bi-droplet text-primary"></i>
+                                        <div>
+                                            <div class="fw-bold">@Model.Property?.BathRooms</div>
+                                            <small class="text-muted">Baths</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="d-flex align-items-center gap-2 p-2 bg-light rounded">
+                                        <i class="bi bi-arrows-angle-expand text-primary"></i>
+                                        <div>
+                                            <div class="fw-bold">@Model.Property?.Area</div>
+                                            <small class="text-muted">m²</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <a asp-controller="Property" asp-action="Details" asp-route-id="@Model.PropertyID" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-eye me-1"></i>View Property
+                                </a>
+                                <a asp-controller="Messages" asp-action="Conversation" asp-route-propertyId="@Model.PropertyID" asp-route-userId="@Model.ClientID" class="btn btn-outline-info btn-sm">
+                                    <i class="bi bi-chat me-1"></i>Message Client
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contract Section (if exists) -->
+            @if (Model.Contract != null)
+            {
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+                        <h5 class="mb-0"><i class="bi bi-file-earmark-text me-2 text-primary"></i>Associated Contract</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="badge @(Model.Contract.Status == ContractStatus.Active ? "bg-success" : Model.Contract.Status == ContractStatus.Expired ? "bg-warning text-dark" : "bg-secondary") mb-2">
+                                    @Model.Contract.Status
+                                </span>
+                                <p class="mb-1"><strong>Start:</strong> @Model.Contract.StartDate.ToString("MMM dd, yyyy")</p>
+                                <p class="mb-0"><strong>End:</strong> @Model.Contract.EndDate?.ToString("MMM dd, yyyy")</p>
+                            </div>
+                            <a asp-controller="Contract" asp-action="Details" asp-route-id="@Model.Contract.ID" class="btn btn-outline-primary">
+                                <i class="bi bi-box-arrow-up-right me-1"></i>View Contract
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Right Column: Timeline & Actions -->
+        <div class="col-lg-4">
+            <!-- Status Timeline -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+                    <h5 class="mb-0"><i class="bi bi-clock-history me-2 text-primary"></i>Transaction Timeline</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="timeline">
+                        <!-- Step 1: Request Submitted -->
+                        <div class="timeline-item @(Model.Date != default ? "completed" : "")">
+                            <div class="timeline-marker">
+                                <i class="bi bi-send"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">Request Submitted</h6>
+                                <p class="text-muted small mb-0">@Model.Date.ToString("MMM dd, yyyy HH:mm")</p>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Under Review -->
+                        <div class="timeline-item @(Model.Status != RequestStatus.Pending ? "completed" : "active")">
+                            <div class="timeline-marker">
+                                <i class="bi bi-eye"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">Under Review</h6>
+                                <p class="text-muted small mb-0">
+                                    @(Model.Status == RequestStatus.Pending ? "Awaiting owner decision..." : "Reviewed by owner")
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Decision -->
+                        <div class="timeline-item @(Model.Status == RequestStatus.Approved || Model.Status == RequestStatus.Rejected ? "completed" : "") @(Model.Status == RequestStatus.Rejected ? "rejected" : "")">
+                            <div class="timeline-marker">
+                                @if (Model.Status == RequestStatus.Approved)
+                                {
+                                    <i class="bi bi-check-lg"></i>
+                                }
+                                else if (Model.Status == RequestStatus.Rejected)
+                                {
+                                    <i class="bi bi-x-lg"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-question"></i>
+                                }
+                            </div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">
+                                    @if (Model.Status == RequestStatus.Approved)
+                                    {
+                                        <span class="text-success">Approved</span>
+                                    }
+                                    else if (Model.Status == RequestStatus.Rejected)
+                                    {
+                                        <span class="text-danger">Rejected</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Decision Pending</span>
+                                    }
+                                </h6>
+                                <p class="text-muted small mb-0">
+                                    @if (Model.Status == RequestStatus.Pending)
+                                    {
+                                        <span>Owner has not decided yet</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Decision made on @Model.Date.ToString("MMM dd, yyyy")</span>
+                                    }
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Step 4: Contract (conditional) -->
+                        <div class="timeline-item @(Model.Contract != null ? "completed" : "") @(Model.Contract == null && Model.Status == RequestStatus.Approved ? "active" : "")">
+                            <div class="timeline-marker">
+                                <i class="bi bi-file-earmark-text"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">Contract</h6>
+                                <p class="text-muted small mb-0">
+                                    @if (Model.Contract != null)
+                                    {
+                                        <span class="text-success">Contract signed</span>
+                                    }
+                                    else if (Model.Status == RequestStatus.Approved)
+                                    {
+                                        <span>Waiting for contract generation...</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Not applicable</span>
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+                    <h5 class="mb-0"><i class="bi bi-lightning me-2 text-primary"></i>Quick Actions</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-grid gap-2">
+                        @if (canManage && Model.Status == RequestStatus.Pending)
+                        {
+                            <button type="button" class="btn btn-success" onclick="document.querySelector('button[type=submit].btn-success').click()">
+                                <i class="bi bi-check-lg me-1"></i>Approve Request
+                            </button>
+                            <button type="button" class="btn btn-danger" onclick="document.querySelector('button[type=submit].btn-danger').click()">
+                                <i class="bi bi-x-lg me-1"></i>Reject Request
+                            </button>
+                        }
+                        <a asp-controller="Messages" asp-action="Conversation" asp-route-propertyId="@Model.PropertyID" asp-route-userId="@Model.ClientID" class="btn btn-outline-primary">
+                            <i class="bi bi-chat-dots me-1"></i>Open Conversation
+                        </a>
+                        @if (Model.Contract == null && Model.Status == RequestStatus.Approved && canManage)
+                        {
+                            <a asp-controller="Contract" asp-action="Create" asp-route-requestId="@Model.ID" class="btn btn-outline-success">
+                                <i class="bi bi-file-earmark-plus me-1"></i>Generate Contract
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.ID">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+
+<style>
+    .client-avatar {
+        width: 80px;
+        height: 80px;
+        background: var(--sakany-primary, #e74c3c);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: 700;
+        font-size: 1.8rem;
+    }
+
+    /* Timeline Styles */
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #e9ecef;
+    }
+
+    .timeline-item {
+        position: relative;
+        padding-bottom: 1.5rem;
+        opacity: 0.5;
+        transition: opacity 0.3s;
+    }
+
+    .timeline-item.completed,
+    .timeline-item.active {
+        opacity: 1;
+    }
+
+    .timeline-item.rejected .timeline-marker {
+        background: #dc3545;
+        border-color: #dc3545;
+        color: #fff;
+    }
+
+    .timeline-marker {
+        position: absolute;
+        left: -30px;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #fff;
+        border: 2px solid #dee2e6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        color: #6c757d;
+        z-index: 1;
+    }
+
+    .timeline-item.completed .timeline-marker {
+        background: #198754;
+        border-color: #198754;
+        color: #fff;
+    }
+
+    .timeline-item.active .timeline-marker {
+        background: #0d6efd;
+        border-color: #0d6efd;
+        color: #fff;
+        animation: pulse 2s infinite;
+    }
+
+    @@keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(13, 110, 253, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0); }
+    }
+
+    .timeline-content h6 {
+        font-weight: 600;
+    }
+
+    .timeline-item:last-child {
+        padding-bottom: 0;
+    }
+</style>

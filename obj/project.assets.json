@@ -11648,11 +11648,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "E:\\IT 230\\Level 3\\2nd term\\WDT Project\\Projects\\Versions\\Kimi\\SakanyApp\\Sakany.csproj",
+      "projectUniqueName": "E:\\IT 230\\Level 3\\2nd term\\WDT Project\\Projects\\SakanyApp\\Sakany.csproj",
       "projectName": "Sakany",
-      "projectPath": "E:\\IT 230\\Level 3\\2nd term\\WDT Project\\Projects\\Versions\\Kimi\\SakanyApp\\Sakany.csproj",
+      "projectPath": "E:\\IT 230\\Level 3\\2nd term\\WDT Project\\Projects\\SakanyApp\\Sakany.csproj",
       "packagesPath": "C:\\Users\\BR\\.nuget\\packages\\",
-      "outputPath": "E:\\IT 230\\Level 3\\2nd term\\WDT Project\\Projects\\Versions\\Kimi\\SakanyApp\\obj\\",
+      "outputPath": "E:\\IT 230\\Level 3\\2nd term\\WDT Project\\Projects\\SakanyApp\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\BR\\AppData\\Roaming\\NuGet\\NuGet.Config"

@@ -1,149 +1,180 @@
 @model Sakany.Models.Property
 @{
     ViewData["Title"] = "Edit Property";
+    var selectedAmenityIds = ViewBag.SelectedAmenityIds as List<string> ?? new List<string>();
 }
 
 <div class="container py-4">
     <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
+        <div class="col-lg-10">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
                     <h4 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Edit Property</h4>
+                    <span class="badge bg-dark">@Model.Status</span>
                 </div>
-                <div class="card-body">
-                    <form asp-action="Edit" method="post" enctype="multipart/form-data">
-                        @Html.AntiForgeryToken()
-                        <!-- Critical: Hidden ID field for correct binding -->
+                <div class="card-body p-4">
+                    <form asp-action="Edit" method="post" enctype="multipart/form-data" id="editPropertyForm">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <input type="hidden" asp-for="ID" />
-                        <input type="hidden" asp-for="CreatedAt" />
                         <input type="hidden" asp-for="OwnerID" />
+                        <input type="hidden" asp-for="CreatedAt" />
 
-                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
-
-                        <!-- Property Address -->
-                        <div class="mb-3">
-                            <label asp-for="Address" class="form-label fw-semibold"></label>
-                            <input asp-for="Address" class="form-control" placeholder="Enter full address (min 10 characters)" />
-                            <span asp-validation-for="Address" class="text-danger"></span>
-                        </div>
-
-                        <!-- City -->
-                        <div class="mb-3">
-                            <label asp-for="City" class="form-label fw-semibold"></label>
-                            <input asp-for="City" class="form-control" placeholder="Enter city name" />
-                            <span asp-validation-for="City" class="text-danger"></span>
-                        </div>
-
-                        <!-- Price -->
-                        <div class="mb-3">
-                            <label asp-for="Price" class="form-label fw-semibold"></label>
-                            <div class="input-group">
-                                <span class="input-group-text">EGP</span>
-                                <input asp-for="Price" class="form-control" type="number" min="1" max="1000000" />
+                        <!-- Basic Info -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3 text-primary">Basic Information</h5>
                             </div>
-                            <span asp-validation-for="Price" class="text-danger"></span>
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="Price" class="form-label fw-semibold">Price (EGP)</label>
+                                <input asp-for="Price" type="number" class="form-control" />
+                                <span asp-validation-for="Price" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="Status" class="form-label fw-semibold">Status</label>
+                                <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<PropertyStatus>()"></select>
+                                <span asp-validation-for="Status" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="Type" class="form-label fw-semibold">Property Type</label>
+                                <select asp-for="Type" class="form-select" asp-items="Html.GetEnumSelectList<PropertyType>()"></select>
+                                <span asp-validation-for="Type" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="City" class="form-label fw-semibold">City</label>
+                                <input asp-for="City" class="form-control" placeholder="e.g., Cairo" />
+                                <span asp-validation-for="City" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Address" class="form-label fw-semibold">Address</label>
+                                <input asp-for="Address" class="form-control" placeholder="Full street address" />
+                                <span asp-validation-for="Address" class="text-danger small"></span>
+                            </div>
                         </div>
 
-                        <!-- Type Dropdown (Enum) -->
-                        <div class="mb-3">
-                            <label asp-for="Type" class="form-label fw-semibold">Property Type</label>
-                            <select asp-for="Type" asp-items="Html.GetEnumSelectList<PropertyType>()" class="form-select">
-                            </select>
-                            <span asp-validation-for="Type" class="text-danger"></span>
+                        <!-- Specifications -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3 text-primary">Specifications</h5>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label asp-for="AvailableRooms" class="form-label fw-semibold">Available Rooms</label>
+                                <input asp-for="AvailableRooms" type="number" class="form-control" min="0" />
+                                <span asp-validation-for="AvailableRooms" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label asp-for="BedRooms" class="form-label fw-semibold">Bedrooms</label>
+                                <input asp-for="BedRooms" type="number" class="form-control" min="1" />
+                                <span asp-validation-for="BedRooms" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label asp-for="BathRooms" class="form-label fw-semibold">Bathrooms</label>
+                                <input asp-for="BathRooms" type="number" class="form-control" min="1" step="0.5" />
+                                <span asp-validation-for="BathRooms" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label asp-for="Area" class="form-label fw-semibold">Area (m²)</label>
+                                <input asp-for="Area" type="number" class="form-control" min="1" />
+                                <span asp-validation-for="Area" class="text-danger small"></span>
+                            </div>
                         </div>
 
-                        <!-- Status Dropdown (Enum) -->
-                        <div class="mb-3">
-                            <label asp-for="Status" class="form-label fw-semibold">Property Status</label>
-                            <select asp-for="Status" asp-items="Html.GetEnumSelectList<PropertyStatus>()" class="form-select">
-                            </select>
-                            <span asp-validation-for="Status" class="text-danger"></span>
-                        </div>
-
-                        <!-- Bedrooms -->
-                        <div class="mb-3">
-                            <label asp-for="BedRooms" class="form-label fw-semibold">Bedrooms</label>
-                            <input asp-for="BedRooms" class="form-control" type="number" min="1" max="50" />
-                            <span asp-validation-for="BedRooms" class="text-danger"></span>
-                        </div>
-
-                        <!-- Bathrooms -->
-                        <div class="mb-3">
-                            <label asp-for="BathRooms" class="form-label fw-semibold">Bathrooms</label>
-                            <input asp-for="BathRooms" class="form-control" type="number" min="1" max="50" />
-                            <span asp-validation-for="BathRooms" class="text-danger"></span>
-                        </div>
-
-                        <!-- Available Rooms -->
-                        <div class="mb-3">
-                            <label asp-for="AvailableRooms" class="form-label fw-semibold">Available Rooms</label>
-                            <input asp-for="AvailableRooms" class="form-control" type="number" min="0" max="50" />
-                            <span asp-validation-for="AvailableRooms" class="text-danger"></span>
-                        </div>
-
-                        <!-- Area -->
-                        <div class="mb-3">
-                            <label asp-for="Area" class="form-label fw-semibold">Area (sqm)</label>
-                            <input asp-for="Area" class="form-control" type="number" min="1" max="100000" />
-                            <span asp-validation-for="Area" class="text-danger"></span>
-                        </div>
-
-                        <!-- Existing Images -->
-                        @if (Model.Image != null && Model.Image.Any())
-                        {
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Existing Images</label>
-                                <div class="row g-2">
-                                    @foreach (var img in Model.Image)
+                        <!-- Amenities -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2 mb-3 text-primary">Amenities</h5>
+                            <div class="row">
+                                @{
+                                    var amenities = ViewBag.Amenities as List<Amenity> ?? new List<Amenity>();
+                                    foreach (var amenity in amenities)
                                     {
                                         <div class="col-md-3 col-6">
-                                            <div class="position-relative">
-                                                <img src="@img.ImageURL" class="img-fluid rounded" style="height: 100px; object-fit: cover; width: 100%;" alt="Property image" />
-                                                <div class="form-check position-absolute top-0 end-0 m-1">
-                                                    <input type="checkbox" name="deleteImageIds" value="@img.ID" class="form-check-input" title="Delete this image" />
+                                            <div class="form-check">
+                                                <input type="checkbox" name="selectedAmenities" value="@amenity.ID"
+                                                       class="form-check-input" id="amenity_@amenity.ID"
+                                                       @(selectedAmenityIds.Contains(amenity.ID) ? "checked" : "") />
+                                                <label class="form-check-label" for="amenity_@amenity.ID">@amenity.Name</label>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Photo Management -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2 mb-3 text-primary d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-images me-2"></i>Photo Management</span>
+                                <span class="badge bg-secondary" id="photoCountBadge">@(Model.Image?.Count ?? 0) photos</span>
+                            </h5>
+
+                            <!-- Existing Photos -->
+                            @if (Model.Image?.Any() == true)
+                            {
+                                <div class="row g-3 mb-4" id="existingPhotosGrid">
+                                    @foreach (var img in Model.Image)
+                                    {
+                                        <div class="col-md-3 col-6 photo-card-wrapper" data-photo-id="@img.ID">
+                                            <div class="card border-0 shadow-sm h-100">
+                                                <div class="position-relative" style="height: 160px;">
+                                                    <img src="@img.ImageURL" class="w-100 h-100 object-fit-cover rounded-top" style="object-fit: cover;" alt="Property photo" />
+                                                    <div class="position-absolute top-0 end-0 m-2">
+                                                        <div class="form-check">
+                                                            <input type="checkbox" name="deletePhotoIds" value="@img.ID"
+                                                                   class="form-check-input photo-delete-check"
+                                                                   id="del_@img.ID"
+                                                                   onchange="togglePhotoDelete(this, '@img.ID')" />
+                                                            <label class="form-check-label visually-hidden" for="del_@img.ID">Delete</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="photo-delete-overlay position-absolute bottom-0 start-0 end-0 bg-danger bg-opacity-75 text-white text-center py-1 d-none" id="overlay_@img.ID">
+                                                        <small><i class="bi bi-trash me-1"></i>Marked for deletion</small>
+                                                    </div>
+                                                </div>
+                                                <div class="card-body p-2 text-center">
+                                                    <a href="@img.ImageURL" target="_blank" class="btn btn-sm btn-outline-primary w-100">
+                                                        <i class="bi bi-arrows-fullscreen me-1"></i>View Full
+                                                    </a>
                                                 </div>
                                             </div>
                                         </div>
                                     }
                                 </div>
-                                <small class="text-muted">Check images to delete them</small>
+                            }
+                            else
+                            {
+                                <div class="alert alert-light border mb-4">
+                                    <i class="bi bi-image me-2"></i>No existing photos. Upload new ones below.
+                                </div>
+                            }
+
+                            <!-- New Photos Upload -->
+                            <div class="border border-dashed rounded-3 p-4 bg-light text-center" id="dropZone">
+                                <i class="bi bi-cloud-upload display-4 text-muted mb-2"></i>
+                                <h6 class="text-muted">Upload New Photos</h6>
+                                <p class="text-muted small mb-3">Drag & drop files here or click to browse. You can select multiple images.</p>
+                                <input type="file" name="newPhotos" id="newPhotosInput" multiple accept="image/*" class="d-none" onchange="previewNewPhotos(this)" />
+                                <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('newPhotosInput').click()">
+                                    <i class="bi bi-plus-lg me-1"></i>Select Files
+                                </button>
                             </div>
-                        }
 
-                        <!-- Main Image Upload -->
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Main Image</label>
-                            <input type="file" name="imageFile" class="form-control" accept=".jpg,.jpeg,.png,.webp,.gif" />
-                            <small class="text-muted">Upload a new main image (jpg, png, webp, gif)</small>
+                            <!-- New Photos Preview -->
+                            <div class="row g-3 mt-3 d-none" id="newPhotosPreview"></div>
                         </div>
 
-                        <!-- Main Image URL -->
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Or Main Image URL</label>
-                            <input type="url" name="imageUrl" class="form-control" placeholder="https://example.com/image.jpg" />
-                        </div>
-
-                        <!-- Extra Images -->
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Extra Images</label>
-                            <input type="file" name="extraImages" class="form-control" multiple accept=".jpg,.jpeg,.png,.webp,.gif" />
-                        </div>
-
-                        <!-- Extra Image URLs -->
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Or Extra Image URLs</label>
-                            <input type="text" name="extraUrls" class="form-control" placeholder="Comma-separated URLs" />
-                        </div>
-
-                        <hr />
-
-                        <div class="d-flex justify-content-between">
-                            <a asp-action="Index" class="btn btn-outline-secondary">
+                        <!-- Actions -->
+                        <div class="d-flex justify-content-between pt-3 border-top">
+                            <a asp-action="Index" asp-route-viewMode="mine" class="btn btn-outline-secondary">
                                 <i class="bi bi-arrow-left me-1"></i>Back to List
                             </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-save me-1"></i>Save Changes
-                            </button>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-outline-danger" onclick="resetForm()">
+                                    <i class="bi bi-x-lg me-1"></i>Reset
+                                </button>
+                                <button type="submit" class="btn btn-warning px-4">
+                                    <i class="bi bi-check-lg me-1"></i>Save Changes
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -154,4 +185,85 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        function togglePhotoDelete(checkbox, photoId) {
+            const wrapper = document.querySelector(`[data-photo-id="${photoId}"]`);
+            const overlay = document.getElementById(`overlay_${photoId}`);
+            const img = wrapper.querySelector('img');
+
+            if (checkbox.checked) {
+                overlay.classList.remove('d-none');
+                img.style.opacity = '0.5';
+                wrapper.querySelector('.card').classList.add('border-danger');
+            } else {
+                overlay.classList.add('d-none');
+                img.style.opacity = '1';
+                wrapper.querySelector('.card').classList.remove('border-danger');
+            }
+            updatePhotoCount();
+        }
+
+        function previewNewPhotos(input) {
+            const previewContainer = document.getElementById('newPhotosPreview');
+            previewContainer.innerHTML = '';
+            previewContainer.classList.remove('d-none');
+
+            if (input.files && input.files.length > 0) {
+                Array.from(input.files).forEach((file, index) => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const col = document.createElement('div');
+                        col.className = 'col-md-3 col-6';
+                        col.innerHTML = `
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="position-relative" style="height: 160px;">
+                                    <img src="${e.target.result}" class="w-100 h-100 object-fit-cover rounded-top" style="object-fit: cover;" />
+                                    <div class="position-absolute top-0 end-0 m-2">
+                                        <span class="badge bg-success">New</span>
+                                    </div>
+                                </div>
+                                <div class="card-body p-2 text-center">
+                                    <small class="text-muted text-truncate d-block">${file.name}</small>
+                                    <small class="text-muted">${(file.size / 1024).toFixed(1)} KB</small>
+                                </div>
+                            </div>
+                        `;
+                        previewContainer.appendChild(col);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+            updatePhotoCount();
+        }
+
+        function updatePhotoCount() {
+            const existing = document.querySelectorAll('.photo-card-wrapper').length;
+            const markedDelete = document.querySelectorAll('.photo-delete-check:checked').length;
+            const newFiles = document.getElementById('newPhotosInput').files.length;
+            const count = existing - markedDelete + newFiles;
+            document.getElementById('photoCountBadge').textContent = count + ' photo' + (count !== 1 ? 's' : '');
+        }
+
+        function resetForm() {
+            if (confirm('Discard all changes and reload?')) {
+                window.location.reload();
+            }
+        }
+
+        const dropZone = document.getElementById('dropZone');
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('border-primary', 'bg-white');
+        });
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('border-primary', 'bg-white');
+        });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-primary', 'bg-white');
+            const input = document.getElementById('newPhotosInput');
+            input.files = e.dataTransfer.files;
+            previewNewPhotos(input);
+        });
+    </script>
 }

@@ -1,189 +1,254 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Sakany.Data;
 using Sakany.Models;
+using Sakany.Services;
 
 namespace Sakany.Controllers
 {
     public class NotificationsController : Controller
     {
         private readonly SakanyDbContext _context;
-		
+        private readonly INotificationService _notificationService;
 
-        public NotificationsController(SakanyDbContext context)
+        public NotificationsController(SakanyDbContext context, INotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
-		
-		private string? SessionUserID => HttpContext.Session.GetString("UserID");
+
+        private string? SessionUserID => HttpContext.Session.GetString("UserID");
         private bool IsLoggedIn => SessionUserID != null;
-		
-        // GET: Notifications
-        public async Task<IActionResult> Index()
+
+        // ── INDEX ─────────────────────────────────────────
+        public async Task<IActionResult> Index(bool? unreadOnly = false)
         {
-			 if (!IsLoggedIn) return RedirectToAction("Login", "Account");
-            var notifications = await _context.Notification
+            if (!IsLoggedIn) return RedirectToAction("Login", "Account");
+
+            var query = _context.Notification
                 .Where(n => n.UserID == SessionUserID)
-                .OrderByDescending(n => n.CreatedAt)
-                .ToListAsync();
-            return View(notifications);
-        }
-		
-		[HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> MarkRead(string id)
-        {
-            if (!IsLoggedIn) return RedirectToAction("Login", "Account");
-            var n = await _context.Notification.FirstOrDefaultAsync(x => x.ID == id && x.UserID == SessionUserID);
-            if (n != null) { n.IsRead = true; await _context.SaveChangesAsync(); }
-            return RedirectToAction(nameof(Index));
+                .OrderByDescending(n => n.Priority)
+                .ThenByDescending(n => n.CreatedAt)
+                .AsQueryable();
+
+            if (unreadOnly == true)
+                query = query.Where(n => !n.IsRead);
+
+            ViewBag.UnreadOnly = unreadOnly ?? false;
+            ViewBag.UnreadCount = await _notificationService.GetUnreadCountAsync(SessionUserID!);
+
+            return View(await query.ToListAsync());
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> MarkAllRead()
-        {
-            if (!IsLoggedIn) return RedirectToAction("Login", "Account");
-            var list = await _context.Notification.Where(n => n.UserID == SessionUserID && !n.IsRead).ToListAsync();
-            list.ForEach(n => n.IsRead = true);
-            await _context.SaveChangesAsync();
-            TempData["Success"] = "All notifications marked as read.";
-            return RedirectToAction(nameof(Index));
-        }
-
-        // GET: Notifications/Details/5
+        // ── DETAILS ───────────────────────────────────────
         public async Task<IActionResult> Details(string id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (!IsLoggedIn) return RedirectToAction("Login", "Account");
+            if (id == null) return NotFound();
 
             var notification = await _context.Notification
-                .Include(n => n.User)
-                .FirstOrDefaultAsync(m => m.ID == id);
-            if (notification == null)
+                .FirstOrDefaultAsync(n => n.ID == id && n.UserID == SessionUserID);
+
+            if (notification == null) return NotFound();
+
+            // Auto-mark as read when viewing details
+            if (!notification.IsRead)
             {
-                return NotFound();
+                await _notificationService.MarkAsReadAsync(id, SessionUserID!);
             }
 
             return View(notification);
         }
 
-        // GET: Notifications/Create
+        // ── CREATE (Admin/System only) ────────────────────
         public IActionResult Create()
         {
-            ViewData["UserID"] = new SelectList(_context.User, "ID", "Name");
+            if (!IsLoggedIn) return RedirectToAction("Login", "Account");
             return View();
         }
 
-        // POST: Notifications/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,UserID,Title,Body,IsRead,CreatedAt")] Notification notification)
+        public async Task<IActionResult> Create([Bind("UserID,Title,Body,Priority,ActionUrl,ActionText")] Notification notification)
         {
+            if (!IsLoggedIn) return RedirectToAction("Login", "Account");
+
+            ModelState.Remove("ID");
+            ModelState.Remove("User");
+            ModelState.Remove("CreatedAt");
+            ModelState.Remove("IsRead");
+
             if (ModelState.IsValid)
             {
+                notification.ID = Guid.NewGuid().ToString();
+                notification.CreatedAt = DateTime.Now;
+                notification.IsRead = false;
+                notification.NotificationType = "Manual";
+
                 _context.Add(notification);
                 await _context.SaveChangesAsync();
+
+                TempData["Success"] = "Notification sent successfully.";
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["UserID"] = new SelectList(_context.User, "ID", "Name", notification.UserID);
+
             return View(notification);
         }
 
-        // GET: Notifications/Edit/5
+        // ── EDIT ──────────────────────────────────────────
         public async Task<IActionResult> Edit(string id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (!IsLoggedIn) return RedirectToAction("Login", "Account");
+            if (id == null) return NotFound();
 
             var notification = await _context.Notification.FindAsync(id);
-            if (notification == null)
-            {
-                return NotFound();
-            }
-            ViewData["UserID"] = new SelectList(_context.User, "ID", "Name", notification.UserID);
+            if (notification == null) return NotFound();
+
             return View(notification);
         }
 
-        // POST: Notifications/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("ID,UserID,Title,Body,IsRead,CreatedAt")] Notification notification)
+        public async Task<IActionResult> Edit(string id, [Bind("ID,UserID,Title,Body,Priority,ActionUrl,ActionText,IsRead")] Notification notification)
         {
-            if (id != notification.ID)
-            {
-                return NotFound();
-            }
+            if (!IsLoggedIn) return RedirectToAction("Login", "Account");
+            if (id != notification.ID) return NotFound();
+
+            ModelState.Remove("User");
+            ModelState.Remove("CreatedAt");
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(notification);
+                    var existing = await _context.Notification.FindAsync(id);
+                    if (existing == null) return NotFound();
+
+                    existing.Title = notification.Title;
+                    existing.Body = notification.Body;
+                    existing.Priority = notification.Priority;
+                    existing.ActionUrl = notification.ActionUrl;
+                    existing.ActionText = notification.ActionText;
+                    existing.IsRead = notification.IsRead;
+                    if (notification.IsRead && !existing.IsRead)
+                        existing.ReadAt = DateTime.Now;
+
+                    _context.Update(existing);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!NotificationExists(notification.ID))
-                    {
                         return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["UserID"] = new SelectList(_context.User, "ID", "ID", notification.UserID);
             return View(notification);
         }
 
-        // GET: Notifications/Delete/5
-
-
-        // POST: Notifications/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        // ── DELETE ────────────────────────────────────────
         public async Task<IActionResult> Delete(string id)
         {
             if (!IsLoggedIn) return RedirectToAction("Login", "Account");
-            var n = await _context.Notification.FirstOrDefaultAsync(x => x.ID == id && x.UserID == SessionUserID);
-            if (n != null) { _context.Notification.Remove(n); await _context.SaveChangesAsync(); }
-            return RedirectToAction(nameof(Index));
+            if (id == null) return NotFound();
+
+            var notification = await _context.Notification
+                .FirstOrDefaultAsync(n => n.ID == id && n.UserID == SessionUserID);
+
+            if (notification == null) return NotFound();
+
+            return View(notification);
         }
 
-        [HttpPost]
+        [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ClearAll()
+        public async Task<IActionResult> DeleteConfirmed(string id)
         {
             if (!IsLoggedIn) return RedirectToAction("Login", "Account");
-            var all = await _context.Notification.Where(n => n.UserID == SessionUserID).ToListAsync();
-            _context.Notification.RemoveRange(all);
-            await _context.SaveChangesAsync();
-            TempData["Success"] = "All cleared.";
+
+            var notification = await _context.Notification
+                .FirstOrDefaultAsync(n => n.ID == id && n.UserID == SessionUserID);
+
+            if (notification != null)
+            {
+                _context.Notification.Remove(notification);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Notification deleted.";
+            }
+
             return RedirectToAction(nameof(Index));
         }
 
-        public async Task<IActionResult> UnreadCount()
+        // ═══════════════════════════════════════════════════
+        // AJAX API ENDPOINTS
+        // ═══════════════════════════════════════════════════
+
+        /// <summary>
+        /// Mark a notification as read via AJAX.
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> MarkAsRead(string id)
         {
-            if (!IsLoggedIn) return Json(0);
-            return Json(await _context.Notification.CountAsync(n => n.UserID == SessionUserID && !n.IsRead));
+            if (!IsLoggedIn) return Unauthorized();
+
+            await _notificationService.MarkAsReadAsync(id, SessionUserID!);
+            var unreadCount = await _notificationService.GetUnreadCountAsync(SessionUserID!);
+
+            return Json(new { success = true, unreadCount });
         }
-		
+
+        /// <summary>
+        /// Mark all notifications as read via AJAX.
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> MarkAllAsRead()
+        {
+            if (!IsLoggedIn) return Unauthorized();
+
+            await _notificationService.MarkAllAsReadAsync(SessionUserID!);
+            return Json(new { success = true, unreadCount = 0 });
+        }
+
+        /// <summary>
+        /// Get unread count for navbar badge via AJAX.
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> GetUnreadCount()
+        {
+            if (!IsLoggedIn) return Json(new { count = 0 });
+
+            var count = await _notificationService.GetUnreadCountAsync(SessionUserID!);
+            return Json(new { count });
+        }
+
+        /// <summary>
+        /// Get recent notifications for dropdown via AJAX.
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> GetRecentNotifications(int count = 5)
+        {
+            if (!IsLoggedIn) return Json(new { notifications = new List<object>() });
+
+            var notifications = await _notificationService.GetRecentAsync(SessionUserID!, count);
+			var result = notifications.Select(n => new
+			{
+				n.ID,
+				n.Title,
+				n.Body,
+				n.IsRead,
+				n.Priority,
+				n.ActionUrl,
+				n.ActionText,
+				n.NotificationType,
+				TimeAgo = n.TimeAgo,  // ADD THIS
+				BadgeClass = n.PriorityBadgeClass,
+				PriorityLabel = n.PriorityLabel  // ADD THIS
+			});
+
+            return Json(new { notifications = result, unreadCount = notifications.Count(n => !n.IsRead) });
+        }
+
         private bool NotificationExists(string id)
         {
             return _context.Notification.Any(e => e.ID == id);

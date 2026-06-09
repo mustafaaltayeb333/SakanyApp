@@ -35,6 +35,9 @@ namespace Sakany
                 options.Cookie.Name = ".Sakany.Session";
             });
             builder.Services.AddHttpContextAccessor();
+			
+			// ── REGISTER NOTIFICATION SERVICE ───────────────────
+			builder.Services.AddScoped<INotificationService, NotificationService>();
 
             // ── PDF ───────────────────────────────────────
             builder.Services.AddSingleton(typeof(IConverter),
