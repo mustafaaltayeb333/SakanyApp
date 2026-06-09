@@ -244,7 +244,7 @@
                                 <li><a class="dropdown-item" asp-controller="Notifications" asp-action="Index"><i class="bi bi-bell me-2"></i>Notifications</a></li>
                                 <li><a class="dropdown-item" asp-controller="Contract" asp-action="Index"><i class="bi bi-file-earmark-text me-2"></i>Contracts</a></li>
                                 <li><a class="dropdown-item" asp-controller="Amenity" asp-action="Index"><i class="bi bi-grid-3x3-gap me-2"></i>Amenities</a></li>
-                                <li><a class="dropdown-item" asp-controller="Messages" asp-action="Index"><i class="bi bi-chat me-2"></i>Messages</a></li>
+                                <li><a class="dropdown-item" asp-controller="Messages" asp-action="Inbox"><i class="bi bi-chat me-2"></i>Messages</a></li>
                             </ul>
                         </li>
                     }
@@ -259,6 +259,24 @@
                                 <i class="bi bi-heart me-1"></i>Wishlist
                             </a>
                         </li>
+						
+						 <!-- MESSAGES with badge -->
+                        <li class="nav-item">
+                            <a class="nav-icon-btn" asp-controller="Messages" asp-action="Inbox" title="Messages" id="msgLink">
+                                <i class="bi bi-chat-dots"></i>
+                                <span class="nav-badge" id="msgBadge"></span>
+                            </a>
+                        </li>
+
+                        <!-- NOTIFICATIONS with badge -->
+                        <li class="nav-item">
+                            <a class="nav-icon-btn" asp-controller="Notifications" asp-action="Index" title="Notifications" id="notifLink">
+                                <i class="bi bi-bell"></i>
+                                <span class="nav-badge" id="notifBadge"></span>
+                            </a>
+                        </li>
+						
+						 <!-- USER DROPDOWN -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle d-flex align-items-center gap-2"
                                href="#" role="button" data-bs-toggle="dropdown">

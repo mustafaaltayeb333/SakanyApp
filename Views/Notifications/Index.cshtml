@@ -1,59 +1,144 @@
 ﻿@model IEnumerable<Sakany.Models.Notification>
-
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Notifications";
+    int unread = Model.Count(n => !n.IsRead);
 }
 
-<h1>Index</h1>
+<div class="container py-4" style="max-width:700px">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1" style="color:#1a1a2e">
+                <i class="bi bi-bell me-2 text-danger"></i>Notifications
+                @if (unread > 0)
+                {
+                    <span class="badge bg-danger ms-1">@unread</span>
+                }
+            </h2>
+            <p class="text-muted mb-0">@Model.Count() total</p>
+        </div>
+        <div class="d-flex gap-2">
+            @if (unread > 0)
+            {
+                <form asp-action="MarkAllRead" method="post">
+                    @Html.AntiForgeryToken()
+                    <button class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-check-all me-1"></i>Mark all read
+                    </button>
+                </form>
+            }
+            @if (Model.Any())
+            {
+                <form asp-action="ClearAll" method="post">
+                    @Html.AntiForgeryToken()
+                    <button class="btn btn-sm btn-outline-danger">
+                        <i class="bi bi-trash me-1"></i>Clear all
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Body)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsRead)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedAt)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.User)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Body)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsRead)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedAt)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.User.ID)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-bell-slash display-1 text-muted opacity-25"></i>
+            <p class="mt-3 text-muted">No notifications yet.</p>
+        </div>
+    }
+    else
+    {
+        <div class="notif-list">
+            @foreach (var n in Model)
+            {
+                <div class="notif-item @(n.IsRead ? "" : "notif-unread")">
+                    <div class="notif-icon">
+                        <i class="bi @(n.IsRead ? "bi-bell" : "bi-bell-fill text-danger")"></i>
+                    </div>
+                    <div class="notif-body flex-fill">
+                        <div class="notif-title">@n.Title</div>
+                        <div class="notif-text">@n.Body</div>
+                        <div class="notif-time">
+                            <i class="bi bi-clock me-1"></i>@n.CreatedAt.ToString("dd MMM yyyy · hh:mm tt")
+                        </div>
+                    </div>
+                    <div class="notif-actions d-flex flex-column gap-1">
+                        @if (!n.IsRead)
+                        {
+                            <form asp-action="MarkRead" asp-route-id="@n.ID" method="post">
+                                @Html.AntiForgeryToken()
+                                <button class="btn btn-xs btn-outline-primary" title="Mark read" style="font-size:.75rem;padding:.15rem .5rem">
+                                    <i class="bi bi-check2"></i>
+                                </button>
+                            </form>
+                        }
+                        <form asp-action="Delete" asp-route-id="@n.ID" method="post">
+                            @Html.AntiForgeryToken()
+                            <button class="btn btn-xs btn-outline-danger" title="Delete" style="font-size:.75rem;padding:.15rem .5rem">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .notif-list {
+        display: flex;
+        flex-direction: column;
+        gap: .5rem;
+    }
+
+    .notif-item {
+        display: flex;
+        align-items: flex-start;
+        gap: .9rem;
+        background: #fff;
+        border-radius: 12px;
+        padding: 1rem 1.1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,.05);
+        border-left: 4px solid transparent;
+        transition: .2s;
+    }
+
+    .notif-unread {
+        border-left-color: #e74c3c;
+        background: #fff9f9;
+    }
+
+    .notif-icon {
+        width: 36px;
+        height: 36px;
+        background: #f8f9fa;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .notif-title {
+        font-weight: 700;
+        font-size: .9rem;
+        color: #1a1a2e;
+        margin-bottom: .2rem;
+    }
+
+    .notif-text {
+        font-size: .85rem;
+        color: #555;
+        margin-bottom: .3rem;
+    }
+
+    .notif-time {
+        font-size: .75rem;
+        color: #aaa;
+    }
+
+    .notif-actions {
+        flex-shrink: 0;
+    }
+</style>

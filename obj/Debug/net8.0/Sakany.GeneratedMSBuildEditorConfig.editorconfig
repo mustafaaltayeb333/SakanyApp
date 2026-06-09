@@ -38,6 +38,14 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxSZWdpc3Rlci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Contract/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29udHJhY3RcRGV0YWlscy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Contract/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29udHJhY3RcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Dashboard/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGFzaGJvYXJkXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
@@ -48,6 +56,14 @@ build_metadata.AdditionalFiles.CssScope =
 
 [E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Home/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Messages/Conversation.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVzc2FnZXNcQ29udmVyc2F0aW9uLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Messages/Inbox.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVzc2FnZXNcSW5ib3guY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Notifications/Create.cshtml]

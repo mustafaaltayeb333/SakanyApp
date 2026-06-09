@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Sakany.Data;
 using Sakany.Models;
@@ -13,164 +8,152 @@ namespace Sakany.Controllers
     public class MessagesController : Controller
     {
         private readonly SakanyDbContext _context;
+        public MessagesController(SakanyDbContext context) { _context = context; }
 
-        public MessagesController(SakanyDbContext context)
-        {
-            _context = context;
-        }
+        private string? SessionUserID => HttpContext.Session.GetString("UserID");
+        private string? SessionUserName => HttpContext.Session.GetString("UserName");
+        private bool IsLoggedIn => SessionUserID != null;
 
-        // GET: Messages
-        public async Task<IActionResult> Index()
+        private async Task Notify(string userId, string title, string body)
         {
-            var sakanyDbContext = _context.Message.Include(m => m.Property).Include(m => m.Receiver).Include(m => m.Sender);
-            return View(await sakanyDbContext.ToListAsync());
-        }
-
-        // GET: Messages/Details/5
-        public async Task<IActionResult> Details(string id)
-        {
-            if (id == null)
+            _context.Notification.Add(new Notification
             {
-                return NotFound();
-            }
+                ID = Guid.NewGuid().ToString(),
+                UserID = userId,
+                Title = title,
+                Body = body,
+                IsRead = false,
+                CreatedAt = DateTime.Now
+            });
+            await _context.SaveChangesAsync();
+        }
 
-            var message = await _context.Message
+        // ── INBOX ─────────────────────────────────────────
+        public async Task<IActionResult> Inbox()
+        {
+            if (!IsLoggedIn) return RedirectToAction("Login", "Account");
+
+            var allMessages = await _context.Message
                 .Include(m => m.Property)
                 .Include(m => m.Receiver)
                 .Include(m => m.Sender)
-                .FirstOrDefaultAsync(m => m.ID == id);
-            if (message == null)
-            {
-                return NotFound();
-            }
+                .Where(m => m.SenderID == SessionUserID || m.ReceiverID == SessionUserID)
+                .OrderByDescending(m => m.Date)
+                .ToListAsync();
 
-            return View(message);
-        }
+            var threads = allMessages
+                .GroupBy(m => new
+                {
+                    m.PropertyID,
+                    OtherID = m.SenderID == SessionUserID ? m.ReceiverID : m.SenderID
+                })
+                .Select(g =>
+                {
+                    var last = g.First();
+                    return new
+                    {
+                        Property = last.Property,
+                        OtherUser = last.SenderID == SessionUserID ? last.Receiver : last.Sender,
+                        LastMessage = last,
+                        UnreadCount = g.Count(m => m.ReceiverID == SessionUserID && !m.IsRead)
+                    };
+                })
+                .ToList<dynamic>();
 
-        // GET: Messages/Create
-        public IActionResult Create()
-        {
-            ViewData["PropertyID"] = new SelectList(_context.Property, "ID", "Address");
-            ViewData["ReceiverID"] = new SelectList(_context.User, "ID", "Name");
-            ViewData["SenderID"] = new SelectList(_context.User, "ID", "Name");
+            ViewBag.Threads = threads;
             return View();
         }
 
-        // POST: Messages/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,SenderID,ReceiverID,PropertyID,MessageText,Date,IsRead")] Message message)
+        // ── CONVERSATION ──────────────────────────────────
+        public async Task<IActionResult> Conversation(string propertyId, string otherUserId)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(message);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["PropertyID"] = new SelectList(_context.Property, "ID", "Address", message.PropertyID);
-            ViewData["ReceiverID"] = new SelectList(_context.User, "ID", "Name", message.ReceiverID);
-            ViewData["SenderID"] = new SelectList(_context.User, "ID", "Name", message.SenderID);
-            return View(message);
-        }
+            if (!IsLoggedIn) return RedirectToAction("Login", "Account");
 
-        // GET: Messages/Edit/5
-        public async Task<IActionResult> Edit(string id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            var property = await _context.Property.Include(p => p.Owner).FirstOrDefaultAsync(p => p.ID == propertyId);
+            var otherUser = await _context.User.FindAsync(otherUserId);
+            if (property == null || otherUser == null) return NotFound();
 
-            var message = await _context.Message.FindAsync(id);
-            if (message == null)
-            {
-                return NotFound();
-            }
-            ViewData["PropertyID"] = new SelectList(_context.Property, "ID", "Address", message.PropertyID);
-            ViewData["ReceiverID"] = new SelectList(_context.User, "ID", "Name", message.ReceiverID);
-            ViewData["SenderID"] = new SelectList(_context.User, "ID", "Name", message.SenderID);
-            return View(message);
-        }
+            // Mark as read
+            var unread = await _context.Message
+                .Where(m => m.PropertyID == propertyId && m.SenderID == otherUserId &&
+                            m.ReceiverID == SessionUserID && !m.IsRead)
+                .ToListAsync();
+            unread.ForEach(m => m.IsRead = true);
+            if (unread.Any()) await _context.SaveChangesAsync();
 
-        // POST: Messages/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("ID,SenderID,ReceiverID,PropertyID,MessageText,Date,IsRead")] Message message)
-        {
-            if (id != message.ID)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(message);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!MessageExists(message.ID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["PropertyID"] = new SelectList(_context.Property, "ID", "Address", message.PropertyID);
-            ViewData["ReceiverID"] = new SelectList(_context.User, "ID", "Name", message.ReceiverID);
-            ViewData["SenderID"] = new SelectList(_context.User, "ID", "Name", message.SenderID);
-            return View(message);
-        }
-
-        // GET: Messages/Delete/5
-        public async Task<IActionResult> Delete(string id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var message = await _context.Message
-                .Include(m => m.Property)
-                .Include(m => m.Receiver)
+            var messages = await _context.Message
                 .Include(m => m.Sender)
-                .FirstOrDefaultAsync(m => m.ID == id);
-            if (message == null)
-            {
-                return NotFound();
-            }
+                .Where(m => m.PropertyID == propertyId &&
+                            ((m.SenderID == SessionUserID && m.ReceiverID == otherUserId) ||
+                             (m.SenderID == otherUserId && m.ReceiverID == SessionUserID)))
+                .OrderBy(m => m.Date)
+                .ToListAsync();
 
-            return View(message);
+            ViewBag.Property = property;
+            ViewBag.OtherUser = otherUser;
+            ViewBag.Messages = messages;
+
+            return View();
         }
 
-        // POST: Messages/Delete/5
-        [HttpPost, ActionName("Delete")]
+        // ── SEND ──────────────────────────────────────────
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
+        public async Task<IActionResult> Send(string propertyId, string receiverId, string messageText)
         {
-            var message = await _context.Message.FindAsync(id);
-            if (message != null)
+            if (!IsLoggedIn) return RedirectToAction("Login", "Account");
+
+            if (string.IsNullOrWhiteSpace(messageText))
             {
-                _context.Message.Remove(message);
+                TempData["Error"] = "Message cannot be empty.";
+                return RedirectToAction(nameof(Conversation), new { propertyId, otherUserId = receiverId });
             }
 
+            var property = await _context.Property.FirstOrDefaultAsync(p => p.ID == propertyId);
+            var receiver = await _context.User.FindAsync(receiverId);
+            if (property == null || receiver == null)
+            { TempData["Error"] = "Invalid property or recipient."; return RedirectToAction(nameof(Inbox)); }
+
+            _context.Message.Add(new Message
+            {
+                ID = Guid.NewGuid().ToString(),
+                SenderID = SessionUserID!,
+                ReceiverID = receiverId,
+                PropertyID = propertyId,
+                MessageText = messageText.Trim(),
+                Date = DateTime.Now,
+                IsRead = false
+            });
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            var preview = messageText.Length > 60 ? messageText[..60] + "…" : messageText;
+            await Notify(receiverId,
+                $"💬 New message from {SessionUserName}",
+                $"Re: {property.Address} — \"{preview}\"");
+
+            return RedirectToAction(nameof(Conversation), new { propertyId, otherUserId = receiverId });
         }
 
-        private bool MessageExists(string id)
+        // ── START (from Property Details page) ────────────
+        public async Task<IActionResult> Start(string propertyId)
         {
-            return _context.Message.Any(e => e.ID == id);
+            if (!IsLoggedIn) return RedirectToAction("Login", "Account");
+
+            var property = await _context.Property.FirstOrDefaultAsync(p => p.ID == propertyId);
+            if (property == null) return NotFound();
+
+            if (property.OwnerID == SessionUserID)
+            { TempData["Error"] = "You cannot message yourself."; return RedirectToAction("Details", "Property", new { id = propertyId }); }
+
+            return RedirectToAction(nameof(Conversation), new { propertyId, otherUserId = property.OwnerID });
+        }
+
+        // ── UNREAD COUNT (JSON) ───────────────────────────
+        public async Task<IActionResult> UnreadCount()
+        {
+            if (!IsLoggedIn) return Json(0);
+            var count = await _context.Message.CountAsync(m => m.ReceiverID == SessionUserID && !m.IsRead);
+            return Json(count);
         }
     }
 }
