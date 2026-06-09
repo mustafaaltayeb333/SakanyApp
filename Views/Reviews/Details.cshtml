@@ -1,54 +1,125 @@
 ﻿@model Sakany.Models.Review
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Review Details";
 }
 
-<h1>Details</h1>
+<div class="container py-4">
 
-<div>
-    <h4>Review</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Rate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Rate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Date)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Date)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Client)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Client.ID)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Property)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Property.ID)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Request)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Request.ID)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.ID">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    ```
+    <div class="card shadow border-0">
+
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">
+                ⭐ Review Details
+            </h3>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-8">
+
+                    <h5 class="mb-3">
+                        Rating
+                    </h5>
+
+                    <div class="fs-2 text-warning mb-4">
+
+                        @for (int i = 0; i < Model.Rate; i++)
+                        {
+                            <span>★</span>
+                        }
+
+                        @for (int i = Model.Rate; i < 5; i++)
+                        {
+                            <span class="text-secondary">★</span>
+                        }
+
+                    </div>
+
+                    <h5 class="mb-3">
+                        Review Comment
+                    </h5>
+
+                    <div class="border rounded p-3 bg-light mb-4">
+
+                        @(string.IsNullOrWhiteSpace(Model.Description)
+                                                ? "No comment provided."
+                                                : Model.Description)
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <div class="card bg-light border-0">
+
+                        <div class="card-body">
+
+                            <h5 class="mb-3">
+                                Review Information
+                            </h5>
+
+                            <p>
+                                <strong>Date:</strong><br />
+                                @Model.Date.ToString("dd MMM yyyy")
+                            </p>
+
+                            <p>
+                                <strong>Reviewer:</strong><br />
+                                @Model.Client?.Name
+                            </p>
+
+                            <p>
+                                <strong>Email:</strong><br />
+                                @Model.Client?.Email
+                            </p>
+
+                            <p>
+                                <strong>Property:</strong><br />
+                                @Model.Property?.Address
+                            </p>
+
+                            <p>
+                                <strong>City:</strong><br />
+                                @Model.Property?.City
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="card-footer bg-white">
+
+            <a asp-action="Edit"
+               asp-route-id="@Model.ID"
+               class="btn btn-warning">
+                ✏️ Edit Review
+            </a>
+
+            <a asp-action="Delete"
+               asp-route-id="@Model.ID"
+               class="btn btn-danger">
+                🗑️ Delete Review
+            </a>
+
+            <a asp-action="Index"
+               class="btn btn-secondary">
+                Back
+            </a>
+
+        </div>
+
+    </div>
+    ```
+
 </div>

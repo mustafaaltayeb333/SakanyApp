@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Sakany.Data;
 using Sakany.Models;
+using Sakany.Services;
 
 namespace Sakany.Controllers
 {
@@ -38,13 +39,13 @@ namespace Sakany.Controllers
             }
 
             var user = await _context.User
-                .FirstOrDefaultAsync(u => u.Email == email && u.Password == password);
-
-            if (user == null)
+                .FirstOrDefaultAsync(u => u.Email == email);
+            if (user == null || !PasswordHasher.Verify(password, user.Password))
             {
                 ModelState.AddModelError("", "Invalid email or password.");
                 return View();
             }
+            
 
             // Store session
             HttpContext.Session.SetString("UserID", user.ID);
@@ -111,7 +112,7 @@ namespace Sakany.Controllers
                 ID = Guid.NewGuid().ToString(),
                 Name = name.Trim(),
                 Email = email.Trim().ToLower(),
-                Password = password,
+                Password = PasswordHasher.Hash(password),
                 Phone = phone?.Trim() ?? "",
                 Role = role
             };
@@ -217,7 +218,7 @@ namespace Sakany.Controllers
                     ModelState.AddModelError("", "Password must be at least 6 characters.");
                     return View(user);
                 }
-                user.Password = newPassword;
+                user.Password = PasswordHasher.Hash(newPassword);
             }
 
             _context.Update(user);

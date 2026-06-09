@@ -1,42 +1,295 @@
 ﻿@model Sakany.Models.Request
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Request Details";
+    var requestAge = (DateTime.Now - Model.Date).Days;
 }
 
-<h1>Details</h1>
+<div class="container mt-4">
 
-<div>
-    <h4>Request</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Date)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Date)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Status)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Client)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Client.ID)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Property)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Property.ID)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.ID">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <!-- Metrics -->
+    <div class="row mb-4">
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h3>@requestAge</h3>
+                    <small class="text-muted">
+                        Days Since Request
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h3>
+                        EGP @Model.Property?.Price.ToString("N0")
+                    </h3>
+                    <small class="text-muted">
+                        Property Price
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h3>
+                        @Model.Property?.AvailableRooms
+                    </h3>
+                    <small class="text-muted">
+                        Available Rooms
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+
+                    @if (Model.Status == Sakany.Models.RequestStatus.Approved)
+                    {
+                        <h3 class="text-success">Approved</h3>
+                    }
+                    else if (Model.Status == Sakany.Models.RequestStatus.Rejected)
+                    {
+                        <h3 class="text-danger">Rejected</h3>
+                    }
+                    else
+                    {
+                        <h3 class="text-warning">Pending</h3>
+                    }
+
+                    <small class="text-muted">
+                        Current Status
+                    </small>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Request Details</h2>
+
+        <span class="badge bg-@(Model.Status == Sakany.Models.RequestStatus.Approved ? "success" :
+                                             Model.Status == Sakany.Models.RequestStatus.Rejected ? "danger" :
+                                             "warning") fs-6">
+            @Model.Status
+        </span>
+    </div>
+
+    <!-- Tenant & Property -->
+    <div class="row">
+
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    Tenant Information
+                </div>
+
+                <div class="card-body">
+                    <p><strong>Name:</strong> @Model.Client?.Name</p>
+                    <p><strong>Email:</strong> @Model.Client?.Email</p>
+                    <p><strong>Phone:</strong> @Model.Client?.Phone</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    Property Information
+                </div>
+
+                <div class="card-body">
+                    <p><strong>Address:</strong> @Model.Property?.Address</p>
+                    <p><strong>City:</strong> @Model.Property?.City</p>
+                    <p><strong>Price:</strong> EGP @Model.Property?.Price</p>
+                    <p><strong>Available Rooms:</strong> @Model.Property?.AvailableRooms</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Timeline -->
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header">
+            Request Timeline
+        </div>
+
+        <div class="card-body">
+
+            <style>
+                .timeline-step {
+                    text-align: center;
+                    min-width: 120px;
+                }
+
+                .timeline-circle {
+                    width: 60px;
+                    height: 60px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: auto;
+                    font-size: 24px;
+                    font-weight: bold;
+                }
+
+                .timeline-line {
+                    flex: 1;
+                    height: 4px;
+                    background: #198754;
+                    margin-top: 28px;
+                }
+
+                .timeline-line-disabled {
+                    flex: 1;
+                    height: 4px;
+                    background: #dee2e6;
+                    margin-top: 28px;
+                }
+            </style>
+
+            <div class="d-flex align-items-start">
+
+                <!-- Created -->
+                <div class="timeline-step">
+                    <div class="timeline-circle bg-success text-white">
+                        ✓
+                    </div>
+                    <div class="mt-2">
+                        Created
+                    </div>
+                </div>
+
+                <div class="timeline-line"></div>
+
+                <!-- Pending -->
+                <div class="timeline-step">
+                    <div class="timeline-circle bg-success text-white">
+                        ✓
+                    </div>
+                    <div class="mt-2">
+                        Pending Review
+                    </div>
+                </div>
+
+                <div class="timeline-line"></div>
+
+                <!-- Status -->
+                <div class="timeline-step">
+
+                    @if (Model.Status == Sakany.Models.RequestStatus.Approved)
+                    {
+                        <div class="timeline-circle bg-success text-white">
+                            ✓
+                        </div>
+                    }
+                    else if (Model.Status == Sakany.Models.RequestStatus.Rejected)
+                    {
+                        <div class="timeline-circle bg-danger text-white">
+                            ✕
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="timeline-circle bg-warning text-dark">
+                            ?
+                        </div>
+                    }
+
+                    <div class="mt-2">
+                        @Model.Status
+                    </div>
+                </div>
+
+                @if (Model.Contract != null)
+                {
+                    <div class="timeline-line"></div>
+                }
+                else
+                {
+                    <div class="timeline-line-disabled"></div>
+                }
+
+                <!-- Contract -->
+                <div class="timeline-step">
+
+                    @if (Model.Contract != null)
+                    {
+                        <div class="timeline-circle bg-success text-white">
+                            ✓
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="timeline-circle bg-light border">
+                            -
+                        </div>
+                    }
+
+                    <div class="mt-2">
+                        Contract
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Request Information -->
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+            Request Information
+        </div>
+
+        <div class="card-body">
+
+            <p>
+                <strong>Request ID:</strong>
+                @Model.ID
+            </p>
+
+            <p>
+                <strong>Date:</strong>
+                @Model.Date.ToString("dd MMM yyyy")
+            </p>
+
+            <p>
+                <strong>Status:</strong>
+                @Model.Status
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="mt-4">
+
+        <a asp-action="Edit"
+           asp-route-id="@Model.ID"
+           class="btn btn-primary">
+            Manage Request
+        </a>
+
+        <a asp-action="Index"
+           class="btn btn-secondary">
+            Back
+        </a>
+
+    </div>
+
 </div>

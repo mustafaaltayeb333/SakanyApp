@@ -20,3 +20,37 @@ html {
 body {
   margin-bottom: 60px;
 }
+/* Sakany Pagination */
+
+.pagination .page-link {
+    color: #0F3460;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    margin: 0 3px;
+    min-width: 42px;
+    text-align: center;
+    transition: all .2s ease;
+}
+
+    .pagination .page-link:hover {
+        background-color: rgba(231, 76, 60, 0.08);
+        border-color: #E74C3C;
+        color: #E74C3C;
+    }
+
+.pagination .page-item.active .page-link {
+    background: #E74C3C;
+    border-color: #E74C3C;
+    color: white;
+    font-weight: 600;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #adb5bd;
+    background-color: white;
+    border-color: #e5e5e5;
+}
+
+.pagination {
+    gap: 4px;
+}

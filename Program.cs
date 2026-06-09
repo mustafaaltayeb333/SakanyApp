@@ -43,6 +43,7 @@ namespace Sakany
             // ── CUSTOM SERVICES ───────────────────────────
             builder.Services.AddScoped<PdfService>();
             builder.Services.AddScoped<EmailService>();
+            builder.Services.AddScoped<NotificationService>();
 
             // ─────────────────────────────────────────────
             var app = builder.Build();
@@ -65,6 +66,7 @@ namespace Sakany
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
             app.Run();
+            
         }
     }
 }

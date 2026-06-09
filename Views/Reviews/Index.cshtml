@@ -12,6 +12,54 @@
 }
 
 <div class="container py-4">
+    @{
+        double avgRating = Model.Any()
+        ? Model.Average(r => r.Rate)
+        : 0;
+    }
+
+    <div class="row mb-4">
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h2 class="text-warning">
+                        ⭐ @avgRating.ToString("0.0")
+                    </h2>
+                    <small class="text-muted">
+                        Average Rating
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h2>
+                        @Model.Count
+                    </h2>
+                    <small class="text-muted">
+                        Reviews On This Page
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h2>
+                        @totalCount
+                    </h2>
+                    <small class="text-muted">
+                        Total Reviews
+                    </small>
+                </div>
+            </div>
+        </div>
+
+    </div>
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold mb-1" style="color:#1a1a2e">
