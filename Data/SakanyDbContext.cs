@@ -212,7 +212,11 @@ namespace Sakany.Data
             
             // Fixed date prevents infinite pending EF migrations
             var fixedDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc); 
-
+			
+			 // FIX: enum only has 3 values (0,1,2) — was incorrectly seeding 0–5
+            int propertyTypeCount  = Enum.GetValues(typeof(PropertyType)).Length;   // = 3
+            int propertyStatusCount = Enum.GetValues(typeof(PropertyStatus)).Length; // = 3
+			
         // 3. Generate 1000 Properties and Images
         for (int i = 1; i <= 1000; i++)
         {
@@ -228,11 +232,12 @@ namespace Sakany.Data
                 OwnerID = ownerId, // Make sure this matches your User foreign key name
                 City = city,
                 Address = $"{city} District {i}",
-                Type = (Sakany.Models.PropertyType)random.Next(0, 6),
-				Status = (Sakany.Models.PropertyStatus)random.Next(0, 3),
+                Type = (Sakany.Models.PropertyType)random.Next(0, propertyTypeCount),
+				Status = (Sakany.Models.PropertyStatus)random.Next(0, propertyStatusCount),
                 AvailableRooms = rooms,
                 BedRooms = rooms,
                 BathRooms = random.Next(1, 6), // 1 to 5
+				Price     = random.Next(2000, 50000),
                 Area = random.Next(50, 750), // 50 to 749
                 CreatedAt = fixedDate 
             });
