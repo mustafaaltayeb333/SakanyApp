@@ -185,7 +185,17 @@
                             <i class="bi bi-x-circle me-1"></i>This property is currently @Model.Status.ToString().ToLower().
                         </div>
                     }
-
+					
+					<!-- Message owner -->
+                    @if (Model.OwnerID != userId)
+                    {
+                        <a asp-controller="Messages" asp-action="Start"
+                           asp-route-propertyId="@Model.ID"
+                           class="btn btn-outline-primary w-100 mb-2">
+                            <i class="bi bi-chat-dots me-2"></i>Message Owner
+                        </a>
+                    }
+					
                     <!-- Wishlist -->
                     @if (isInWishlist)
                     {

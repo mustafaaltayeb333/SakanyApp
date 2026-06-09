@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Sakany")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b1aa995f48729e87a5ffb2fba54ff6882bafd1a5")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6e52c2f617d33ce8a6ace98426e329a2c2acb20c")]
 [assembly: System.Reflection.AssemblyProductAttribute("Sakany")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Sakany")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
