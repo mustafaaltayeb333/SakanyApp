@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Sakany.Data;
@@ -123,12 +123,11 @@ namespace Sakany.Controllers
         // INDEX
         // ═══════════════════════════════════════════════════
         public async Task<IActionResult> Index(string? city, string? type, string? status,
-                                               decimal? minPrice, decimal? maxPrice,
+                                               decimal? minPrice, decimal? maxPrice, string? sortBy,
                                                int pageNumber = 1)
         {
-			int pageSize = 9;
-			
-			
+            int pageSize = 9;
+
             var query = _context.Property
                 .Include(p => p.Owner)
                 .Include(p => p.Image)
@@ -156,9 +155,18 @@ namespace Sakany.Controllers
             if (maxPrice.HasValue)
                 query = query.Where(p => p.Price <= maxPrice);
 
+            // ── SORTING ───────────────────────────────────
+            query = sortBy?.ToLowerInvariant() switch
+            {
+                "price_asc" => query.OrderBy(p => p.Price),
+                "price_desc" => query.OrderByDescending(p => p.Price),
+                "recent" => query.OrderByDescending(p => p.CreatedAt),
+                _ => query.OrderByDescending(p => p.CreatedAt) // Default: recent first
+            };
+
             // ── PAGINATION ────────────────────────────────
             var paginatedResult = await PaginatedList<Property>.CreateAsync(
-                query.OrderByDescending(p => p.CreatedAt), pageNumber, pageSize);
+                query, pageNumber, pageSize);
 
             ViewBag.CurrentPage = paginatedResult.PageIndex;
             ViewBag.TotalPages = paginatedResult.TotalPages;
@@ -174,6 +182,7 @@ namespace Sakany.Controllers
             ViewBag.CurrentStatus = status;
             ViewBag.CurrentMinPrice = minPrice;
             ViewBag.CurrentMaxPrice = maxPrice;
+            ViewBag.CurrentSort = sortBy ?? "recent";
 
             if (IsTenant && IsLoggedIn)
             {
@@ -357,9 +366,9 @@ namespace Sakany.Controllers
 
             if (IsOwner && existing.OwnerID != SessionUserID)
             {
-				TempData["Error"] = "You can only edit your own properties."; 
-				return RedirectToAction(nameof(Index)); 
-			}
+                TempData["Error"] = "You can only edit your own properties.";
+                return RedirectToAction(nameof(Index));
+            }
 
             if (IsOwner) property.OwnerID = existing.OwnerID;
 
@@ -410,21 +419,20 @@ namespace Sakany.Controllers
         // ═══════════════════════════════════════════════════
         public async Task<IActionResult> Delete(string? id)
         {
-			if (id == null) return NotFound();
+            if (id == null) return NotFound();
             if (!IsLoggedIn) return RedirectToAction("Login", "Account");
             if (IsTenant) { TempData["Error"] = "Tenants cannot delete properties."; return RedirectToAction(nameof(Index)); }
-            
 
             var property = await _context.Property.Include(p => p.Owner).FirstOrDefaultAsync(p => p.ID == id);
             if (property == null) return NotFound();
 
             if (IsOwner && property.OwnerID != SessionUserID)
-            { 
-				TempData["Error"] = "You can only delete your own properties.";
-				return RedirectToAction(nameof(Index)); 
-			}
-			
-			if (IsTenant)
+            {
+                TempData["Error"] = "You can only delete your own properties.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (IsTenant)
             {
                 TempData["Error"] = "Tenants cannot delete properties.";
                 return RedirectToAction(nameof(Index));
@@ -455,7 +463,6 @@ namespace Sakany.Controllers
                 await _context.SaveChangesAsync();
                 TempData["Success"] = "Property deleted.";
             }
-
             return RedirectToAction(nameof(Index));
         }
     }

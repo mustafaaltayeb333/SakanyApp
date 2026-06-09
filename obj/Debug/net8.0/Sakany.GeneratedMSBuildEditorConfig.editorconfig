@@ -17,175 +17,195 @@ build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = Sakany
 build_property.RootNamespace = Sakany
-build_property.ProjectDir = E:\IT 230\Level 3\2nd term\WDT Project\Projects\SakanyApp\
+build_property.ProjectDir = E:\IT 230\Level 3\2nd term\WDT Project\Projects\Versions\Kimi\SakanyApp\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 8.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = E:\IT 230\Level 3\2nd term\WDT Project\Projects\SakanyApp
+build_property.MSBuildProjectDirectory = E:\IT 230\Level 3\2nd term\WDT Project\Projects\Versions\Kimi\SakanyApp
 build_property._RazorSourceGeneratorDebug = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Account/Login.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Account/EditProfile.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxFZGl0UHJvZmlsZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Account/Login.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxMb2dpbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Account/Profile.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Account/Profile.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxQcm9maWxlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Account/Register.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Account/Register.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxSZWdpc3Rlci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Contract/Details.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Amenity/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQW1lbml0eVxDcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Amenity/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQW1lbml0eVxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Contract/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29udHJhY3RcRGV0YWlscy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Contract/Index.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Contract/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29udHJhY3RcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Dashboard/Index.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Dashboard/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGFzaGJvYXJkXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Home/Index.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Home/Privacy.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Home/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Messages/Conversation.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Messages/Conversation.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVzc2FnZXNcQ29udmVyc2F0aW9uLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Messages/Inbox.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Messages/Inbox.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVzc2FnZXNcSW5ib3guY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Notifications/Create.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Notifications/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTm90aWZpY2F0aW9uc1xDcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Notifications/Delete.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Notifications/Delete.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTm90aWZpY2F0aW9uc1xEZWxldGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Notifications/Details.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Notifications/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTm90aWZpY2F0aW9uc1xEZXRhaWxzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Notifications/Edit.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Notifications/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTm90aWZpY2F0aW9uc1xFZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Notifications/Index.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Notifications/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTm90aWZpY2F0aW9uc1xJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Property/Create.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Property/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvcGVydHlcQ3JlYXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Property/Delete.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Property/Delete.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvcGVydHlcRGVsZXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Property/Details.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Property/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvcGVydHlcRGV0YWlscy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Property/edit.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Property/edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvcGVydHlcZWRpdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Property/Index.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Property/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvcGVydHlcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Requests/Create.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Report/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVwb3J0XENyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Report/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVwb3J0XEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Requests/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVxdWVzdHNcQ3JlYXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Requests/Delete.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Requests/Delete.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVxdWVzdHNcRGVsZXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Requests/Details.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Requests/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVxdWVzdHNcRGV0YWlscy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Requests/Edit.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Requests/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVxdWVzdHNcRWRpdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Requests/Index.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Requests/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVxdWVzdHNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Reviews/Create.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Reviews/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmV2aWV3c1xDcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Reviews/Delete.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Reviews/Delete.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmV2aWV3c1xEZWxldGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Reviews/Details.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Reviews/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmV2aWV3c1xEZXRhaWxzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Reviews/Edit.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Reviews/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmV2aWV3c1xFZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Reviews/Index.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Reviews/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmV2aWV3c1xJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Shared/Error.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Shared/_ValidationScriptsPartial.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/User/Create.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/User/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlclxDcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/User/Delete.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/User/Delete.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlclxEZWxldGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/User/Details.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/User/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlclxEZXRhaWxzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/User/Edit.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/User/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlclxFZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/User/Index.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/User/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlclxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Wishlist/Index.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Wishlist/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcV2lzaGxpc3RcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/_ViewImports.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/_ViewStart.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/IT 230/Level 3/2nd term/WDT Project/Projects/SakanyApp/Views/Shared/_Layout.cshtml]
+[E:/IT 230/Level 3/2nd term/WDT Project/Projects/Versions/Kimi/SakanyApp/Views/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-omwnt9efxe

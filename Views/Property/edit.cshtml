@@ -1,183 +1,157 @@
-﻿@model Sakany.Models.Property
+@model Sakany.Models.Property
 @{
     ViewData["Title"] = "Edit Property";
-    var role = Context.Session.GetString("UserRole");
-    var images = Model.Image?.ToList() ?? new List<Sakany.Models.PropertyImage>();
 }
 
-<div class="container py-4" style="max-width:820px">
-    <a asp-action="Index" class="btn btn-sm btn-outline-secondary mb-3">
-        <i class="bi bi-arrow-left me-1"></i>Back
-    </a>
-    <div class="form-card">
-        <div class="form-card-header"><i class="bi bi-pencil me-2"></i>Edit Property</div>
-        <div class="form-card-body">
-            <form asp-action="Edit" method="post" enctype="multipart/form-data">
-                @Html.AntiForgeryToken()
-                <input type="hidden" asp-for="ID" />
-                <div asp-validation-summary="ModelOnly" class="alert alert-danger small py-2"></div>
-
-                @if (role == "Admin")
-                {
-                    <div class="mb-3">
-                        <label class="form-label fw-600">Owner</label>
-                        <select asp-for="OwnerID" asp-items="@(ViewData["OwnerID"] as SelectList)" class="form-select">
-                            <option value="">— Select Owner —</option>
-                        </select>
-                    </div>
-                }
-                else { <input type="hidden" asp-for="OwnerID" /> }
-
-                <div class="section-label">Property Info</div>
-                <div class="row g-3 mb-4">
-                    <div class="col-12">
-                        <label asp-for="Address" class="form-label fw-600"></label>
-                        <input asp-for="Address" class="form-control" />
-                        <span asp-validation-for="Address" class="text-danger small"></span>
-                    </div>
-                    <div class="col-md-6">
-                        <label asp-for="City" class="form-label fw-600"></label>
-                        <input asp-for="City" class="form-control" />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-600">Price (EGP/month)</label>
-                        <input asp-for="Price" type="number" step="100" class="form-control" />
-                    </div>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Edit Property</h4>
                 </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        <!-- Critical: Hidden ID field for correct binding -->
+                        <input type="hidden" asp-for="ID" />
+                        <input type="hidden" asp-for="CreatedAt" />
+                        <input type="hidden" asp-for="OwnerID" />
 
-                <div class="section-label">Type &amp; Status</div>
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <label class="form-label fw-600">Type</label>
-                        <select name="Type" class="form-select">
-                            @foreach (var item in (ViewBag.StatusList as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> ?? new()))
-                            {
-                                if (item.Selected)
-                                {
-                                    <option value="@item.Value" selected>@item.Text</option>
-                                }
-                                else
-                                {
-                                    <option value="@item.Value">@item.Text</option>
-                                }
-                            }
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-600">Status</label>
-                        <select name="Status" class="form-select">
-                            @foreach (var item in (ViewBag.StatusList as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> ?? new()))
-                            {
-                                if (item.Selected)
-                                {
-                                    <option value="@item.Value" selected>@item.Text</option>
-                                }
-                                else
-                                {
-                                    <option value="@item.Value">@item.Text</option>
-                                }
-                            }
-                        </select>
-                    </div>
-                </div>
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
-                <div class="section-label">Rooms &amp; Size</div>
-                <div class="row g-3 mb-4">
-                    <div class="col-md-3">
-                        <label asp-for="BedRooms" class="form-label fw-600">Bedrooms</label>
-                        <input asp-for="BedRooms" type="number" min="1" class="form-control" />
-                    </div>
-                    <div class="col-md-3">
-                        <label asp-for="BathRooms" class="form-label fw-600">Bathrooms</label>
-                        <input asp-for="BathRooms" type="number" min="1" class="form-control" />
-                    </div>
-                    <div class="col-md-3">
-                        <label asp-for="AvailableRooms" class="form-label fw-600">Available</label>
-                        <input asp-for="AvailableRooms" type="number" min="0" class="form-control" />
-                    </div>
-                    <div class="col-md-3">
-                        <label asp-for="Area" class="form-label fw-600">Area (m²)</label>
-                        <input asp-for="Area" type="number" step="0.5" class="form-control" />
-                    </div>
-                </div>
+                        <!-- Property Address -->
+                        <div class="mb-3">
+                            <label asp-for="Address" class="form-label fw-semibold"></label>
+                            <input asp-for="Address" class="form-control" placeholder="Enter full address (min 10 characters)" />
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
 
-                @if (images.Any())
-                {
-                    <div class="section-label">Current Photos <small class="text-muted fw-normal">(tick to delete)</small></div>
-                    <div class="row g-2 mb-4">
-                        @foreach (var img in images)
+                        <!-- City -->
+                        <div class="mb-3">
+                            <label asp-for="City" class="form-label fw-semibold"></label>
+                            <input asp-for="City" class="form-control" placeholder="Enter city name" />
+                            <span asp-validation-for="City" class="text-danger"></span>
+                        </div>
+
+                        <!-- Price -->
+                        <div class="mb-3">
+                            <label asp-for="Price" class="form-label fw-semibold"></label>
+                            <div class="input-group">
+                                <span class="input-group-text">EGP</span>
+                                <input asp-for="Price" class="form-control" type="number" min="1" max="1000000" />
+                            </div>
+                            <span asp-validation-for="Price" class="text-danger"></span>
+                        </div>
+
+                        <!-- Type Dropdown (Enum) -->
+                        <div class="mb-3">
+                            <label asp-for="Type" class="form-label fw-semibold">Property Type</label>
+                            <select asp-for="Type" asp-items="Html.GetEnumSelectList<PropertyType>()" class="form-select">
+                            </select>
+                            <span asp-validation-for="Type" class="text-danger"></span>
+                        </div>
+
+                        <!-- Status Dropdown (Enum) -->
+                        <div class="mb-3">
+                            <label asp-for="Status" class="form-label fw-semibold">Property Status</label>
+                            <select asp-for="Status" asp-items="Html.GetEnumSelectList<PropertyStatus>()" class="form-select">
+                            </select>
+                            <span asp-validation-for="Status" class="text-danger"></span>
+                        </div>
+
+                        <!-- Bedrooms -->
+                        <div class="mb-3">
+                            <label asp-for="BedRooms" class="form-label fw-semibold">Bedrooms</label>
+                            <input asp-for="BedRooms" class="form-control" type="number" min="1" max="50" />
+                            <span asp-validation-for="BedRooms" class="text-danger"></span>
+                        </div>
+
+                        <!-- Bathrooms -->
+                        <div class="mb-3">
+                            <label asp-for="BathRooms" class="form-label fw-semibold">Bathrooms</label>
+                            <input asp-for="BathRooms" class="form-control" type="number" min="1" max="50" />
+                            <span asp-validation-for="BathRooms" class="text-danger"></span>
+                        </div>
+
+                        <!-- Available Rooms -->
+                        <div class="mb-3">
+                            <label asp-for="AvailableRooms" class="form-label fw-semibold">Available Rooms</label>
+                            <input asp-for="AvailableRooms" class="form-control" type="number" min="0" max="50" />
+                            <span asp-validation-for="AvailableRooms" class="text-danger"></span>
+                        </div>
+
+                        <!-- Area -->
+                        <div class="mb-3">
+                            <label asp-for="Area" class="form-label fw-semibold">Area (sqm)</label>
+                            <input asp-for="Area" class="form-control" type="number" min="1" max="100000" />
+                            <span asp-validation-for="Area" class="text-danger"></span>
+                        </div>
+
+                        <!-- Existing Images -->
+                        @if (Model.Image != null && Model.Image.Any())
                         {
-                            <div class="col-4 col-md-3">
-                                <div class="existing-img-wrap">
-                                    <img src="@img.ImageURL" class="existing-img" alt="property photo" />
-                                    <label class="img-delete-check" title="Delete">
-                                        <input type="checkbox" name="deleteImageIds" value="@img.ID" />
-                                        <i class="bi bi-trash-fill"></i>
-                                    </label>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Existing Images</label>
+                                <div class="row g-2">
+                                    @foreach (var img in Model.Image)
+                                    {
+                                        <div class="col-md-3 col-6">
+                                            <div class="position-relative">
+                                                <img src="@img.ImageURL" class="img-fluid rounded" style="height: 100px; object-fit: cover; width: 100%;" alt="Property image" />
+                                                <div class="form-check position-absolute top-0 end-0 m-1">
+                                                    <input type="checkbox" name="deleteImageIds" value="@img.ID" class="form-check-input" title="Delete this image" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
                                 </div>
+                                <small class="text-muted">Check images to delete them</small>
                             </div>
                         }
-                    </div>
-                }
 
-                <div class="section-label">Add More Photos</div>
-                <div class="image-upload-box mb-4">
-                    <ul class="nav nav-tabs mb-3">
-                        <li class="nav-item">
-                            <button class="nav-link active" type="button" data-bs-toggle="tab" data-bs-target="#e-upload">
-                                <i class="bi bi-upload me-1"></i>Upload
-                            </button>
-                        </li>
-                        <li class="nav-item">
-                            <button class="nav-link" type="button" data-bs-toggle="tab" data-bs-target="#e-url">
-                                <i class="bi bi-link-45deg me-1"></i>URL
-                            </button>
-                        </li>
-                    </ul>
-                    <div class="tab-content">
-                        <div class="tab-pane fade show active" id="e-upload">
-                            <input type="file" name="imageFile" class="form-control form-control-sm mb-2"
-                                   accept=".jpg,.jpeg,.png,.webp,.gif"
-                                   onchange="prvFile(this)" />
-                            <div id="ePrv" class="d-none mb-2">
-                                <img id="ePrvImg" src="" class="img-thumbnail" style="max-height:100px" />
-                            </div>
-                            <label class="form-label small fw-600">More files</label>
-                            <input type="file" name="extraImages" class="form-control form-control-sm"
-                                   accept=".jpg,.jpeg,.png,.webp,.gif" multiple />
+                        <!-- Main Image Upload -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Main Image</label>
+                            <input type="file" name="imageFile" class="form-control" accept=".jpg,.jpeg,.png,.webp,.gif" />
+                            <small class="text-muted">Upload a new main image (jpg, png, webp, gif)</small>
                         </div>
-                        <div class="tab-pane fade" id="e-url">
-                            <input type="url" name="imageUrl" class="form-control mb-2"
-                                   placeholder="https://example.com/photo.jpg"
-                                   oninput="prvUrl(this.value)" />
-                            <div id="eUrlPrv" class="d-none mb-2">
-                                <img id="eUrlPrvImg" src="" class="img-thumbnail" style="max-height:100px" />
-                            </div>
-                            <div id="eUrlList">
-                                <div class="input-group mb-2">
-                                    <input type="url" name="extraUrls" class="form-control form-control-sm" placeholder="https://..." />
-                                    <button type="button" class="btn btn-outline-success btn-sm" onclick="addUrl()"><i class="bi bi-plus"></i></button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-danger px-5"><i class="bi bi-save me-2"></i>Save Changes</button>
-                    <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancel</a>
+                        <!-- Main Image URL -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Or Main Image URL</label>
+                            <input type="url" name="imageUrl" class="form-control" placeholder="https://example.com/image.jpg" />
+                        </div>
+
+                        <!-- Extra Images -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Extra Images</label>
+                            <input type="file" name="extraImages" class="form-control" multiple accept=".jpg,.jpeg,.png,.webp,.gif" />
+                        </div>
+
+                        <!-- Extra Image URLs -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Or Extra Image URLs</label>
+                            <input type="text" name="extraUrls" class="form-control" placeholder="Comma-separated URLs" />
+                        </div>
+
+                        <hr />
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i>Back to List
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i>Save Changes
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
 
-<style>
-    .fw-600{font-weight:600}.form-card{background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,.08);overflow:hidden}.form-card-header{background:linear-gradient(135deg,#1a1a2e,#0f3460);color:#fff;padding:1.25rem 1.5rem;font-weight:700;font-size:1.1rem}.form-card-body{padding:1.75rem 1.5rem}.section-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#e74c3c;margin-bottom:.75rem;padding-bottom:.3rem;border-bottom:2px solid #fef2f2}.form-control:focus,.form-select:focus{border-color:#e74c3c;box-shadow:0 0 0 .2rem rgba(231,76,60,.12)}.image-upload-box{background:#f8f9fa;border-radius:12px;padding:1.25rem;border:1px dashed #dee2e6}.existing-img-wrap{position:relative;border-radius:10px;overflow:hidden}.existing-img{width:100%;height:90px;object-fit:cover;display:block;border-radius:10px;transition:.2s}.img-delete-check{position:absolute;top:5px;right:5px;cursor:pointer}.img-delete-check input{display:none}.img-delete-check i{background:rgba(220,53,69,.8);color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:.8rem;opacity:0;transition:.2s}.existing-img-wrap:hover .img-delete-check i{opacity:1}.img-delete-check input:checked+i{opacity:1;background:#dc3545}.existing-img-wrap:has(input:checked) .existing-img{opacity:.35;filter:grayscale(1)}.nav-tabs .nav-link{color:#666;font-size:.88rem}.nav-tabs .nav-link.active{color:#e74c3c;font-weight:600}
-</style>
-<script>
-    function prvFile(i){const f=i.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{document.getElementById('ePrvImg').src=e.target.result;document.getElementById('ePrv').classList.remove('d-none');};r.readAsDataURL(f);}
-    function prvUrl(u){const b=document.getElementById('eUrlPrv'),i=document.getElementById('eUrlPrvImg');if(u){i.src=u;b.classList.remove('d-none');}else b.classList.add('d-none');}
-    function addUrl(){const d=document.createElement('div');d.className='input-group mb-2';d.innerHTML='<input type="url" name="extraUrls" class="form-control form-control-sm" placeholder="https://..."/><button type="button" class="btn btn-outline-danger btn-sm" onclick="this.parentElement.remove()"><i class="bi bi-x"></i></button>';document.getElementById('eUrlList').appendChild(d);}
-</script>
-@section Scripts { @{await Html.RenderPartialAsync("_ValidationScriptsPartial");} }
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

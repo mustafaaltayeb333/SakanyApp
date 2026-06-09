@@ -1,4 +1,4 @@
-﻿@model List<Sakany.Models.Property>
+@model List<Sakany.Models.Property>
 @{
     ViewData["Title"] = "Properties";
     var role = Context.Session.GetString("UserRole");
@@ -8,11 +8,25 @@
     int currentPage = ViewBag.CurrentPage ?? 1;
     int totalPages = ViewBag.TotalPages ?? 1;
     int totalCount = ViewBag.TotalCount ?? 0;
+    string currentSort = ViewBag.CurrentSort ?? "recent";
 
-    // Helper: build query string keeping all current filters + new page number
+    // Helper: build query string keeping all current filters + new page number + sort
     string PageUrl(int page)
     {
         var qs = new System.Text.StringBuilder("?pageNumber=").Append(page);
+        if (!string.IsNullOrEmpty(ViewBag.CurrentCity as string)) qs.Append("&city=").Append(Uri.EscapeDataString(ViewBag.CurrentCity));
+        if (!string.IsNullOrEmpty(ViewBag.CurrentType as string)) qs.Append("&type=").Append(Uri.EscapeDataString(ViewBag.CurrentType));
+        if (!string.IsNullOrEmpty(ViewBag.CurrentStatus as string)) qs.Append("&status=").Append(Uri.EscapeDataString(ViewBag.CurrentStatus));
+        if (ViewBag.CurrentMinPrice != null) qs.Append("&minPrice=").Append(ViewBag.CurrentMinPrice);
+        if (ViewBag.CurrentMaxPrice != null) qs.Append("&maxPrice=").Append(ViewBag.CurrentMaxPrice);
+        if (!string.IsNullOrEmpty(currentSort) && currentSort != "recent") qs.Append("&sortBy=").Append(Uri.EscapeDataString(currentSort));
+        return qs.ToString();
+    }
+
+    // Helper: build sort URL preserving other filters
+    string SortUrl(string sortValue)
+    {
+        var qs = new System.Text.StringBuilder("?sortBy=").Append(Uri.EscapeDataString(sortValue));
         if (!string.IsNullOrEmpty(ViewBag.CurrentCity as string)) qs.Append("&city=").Append(Uri.EscapeDataString(ViewBag.CurrentCity));
         if (!string.IsNullOrEmpty(ViewBag.CurrentType as string)) qs.Append("&type=").Append(Uri.EscapeDataString(ViewBag.CurrentType));
         if (!string.IsNullOrEmpty(ViewBag.CurrentStatus as string)) qs.Append("&status=").Append(Uri.EscapeDataString(ViewBag.CurrentStatus));
@@ -51,9 +65,9 @@
         }
     </div>
 
-    <!-- FILTERS -->
+    <!-- FILTERS + SORT -->
     <div class="filter-bar mb-4">
-        <form asp-action="Index" method="get">
+        <form asp-action="Index" method="get" id="filterForm">
             <div class="row g-2 align-items-end">
                 <div class="col-6 col-md-2">
                     <label class="filter-label">City</label>
@@ -104,7 +118,36 @@
                     </button>
                 </div>
             </div>
+            <!-- Preserve sort when submitting filter form -->
+            @if (!string.IsNullOrEmpty(currentSort) && currentSort != "recent")
+            {
+                <input type="hidden" name="sortBy" value="@currentSort" />
+            }
         </form>
+
+        <!-- Sort Bar -->
+        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+            <div class="d-flex align-items-center gap-2">
+                <label class="text-muted small mb-0"><i class="bi bi-sort-down me-1"></i>Sort By:</label>
+                <div class="btn-group btn-group-sm" role="group">
+                    <a href="@SortUrl("recent")" class="btn @(currentSort == "recent" ? "btn-dark" : "btn-outline-secondary")">
+                        <i class="bi bi-clock me-1"></i>Recent
+                    </a>
+                    <a href="@SortUrl("price_asc")" class="btn @(currentSort == "price_asc" ? "btn-dark" : "btn-outline-secondary")">
+                        <i class="bi bi-sort-numeric-up me-1"></i>Price: Low to High
+                    </a>
+                    <a href="@SortUrl("price_desc")" class="btn @(currentSort == "price_desc" ? "btn-dark" : "btn-outline-secondary")">
+                        <i class="bi bi-sort-numeric-down me-1"></i>Price: High to Low
+                    </a>
+                </div>
+            </div>
+            @if (!string.IsNullOrEmpty(currentSort) && currentSort != "recent")
+            {
+                <a href="@SortUrl("recent")" class="btn btn-sm btn-link text-decoration-none text-muted">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i>Reset Sort
+                </a>
+            }
+        </div>
     </div>
 
     <!-- PROPERTY CARDS -->
@@ -183,7 +226,7 @@
                                 <i class="bi bi-map me-1"></i>@item.City
                                 @if (role != "Tenant")
                                 {
-                                    <span class="ms-2 text-muted">· Owner: <strong>@item.Owner?.Name</strong></span>
+                                    <span class="ms-2 text-muted">&middot; Owner: <strong>@item.Owner?.Name</strong></span>
                                 }
                             </p>
 
@@ -191,7 +234,7 @@
                             <div class="prop-specs">
                                 <span><i class="bi bi-door-open"></i> @item.BedRooms bd</span>
                                 <span><i class="bi bi-droplet"></i> @item.BathRooms ba</span>
-                                <span><i class="bi bi-arrows-fullscreen"></i> @item.Area m²</span>
+                                <span><i class="bi bi-arrows-fullscreen"></i> @item.Area m&sup2;</span>
                                 <span><i class="bi bi-person-check"></i> @item.AvailableRooms avail</span>
                             </div>
 
@@ -210,394 +253,218 @@
                                 </div>
                             }
 
-                            <!-- ACTIONS -->
-                            <div class="prop-actions mt-3">
-                                <a asp-action="Details" asp-route-id="@item.ID"
-                                   class="btn btn-sm btn-outline-secondary flex-fill">
+                            <!-- Actions -->
+                            <div class="prop-actions">
+                                <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-outline-danger btn-sm">
                                     <i class="bi bi-eye me-1"></i>Details
                                 </a>
-
-                                @if (role == "Tenant")
+                                @if (role == "Owner" || role == "Admin")
                                 {
-                                    @if (item.Status == Sakany.Models.PropertyStatus.Available && item.AvailableRooms > 0)
-                                    {
-                                        <a asp-controller="Requests" asp-action="Create"
-                                           asp-route-propertyId="@item.ID"
-                                           class="btn btn-sm btn-danger flex-fill">
-                                            <i class="bi bi-send me-1"></i>Request
-                                        </a>
-                                    }
-                                    else
-                                    {
-                                        <span class="btn btn-sm btn-secondary flex-fill disabled">Unavailable</span>
-                                    }
-                                }
-
-                                @if (role == "Owner" && item.OwnerID == userId)
-                                {
-                                    <a asp-action="Edit" asp-route-id="@item.ID"
-                                       class="btn btn-sm btn-warning flex-fill">
+                                    <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-outline-secondary btn-sm">
                                         <i class="bi bi-pencil me-1"></i>Edit
                                     </a>
-                                    <a asp-action="Delete" asp-route-id="@item.ID"
-                                       class="btn btn-sm btn-outline-danger flex-fill">
+                                    <a asp-action="Delete" asp-route-id="@item.ID" class="btn btn-outline-danger btn-sm">
                                         <i class="bi bi-trash me-1"></i>Delete
-                                    </a>
-                                }
-
-                                @if (role == "Admin")
-                                {
-                                    <a asp-action="Edit" asp-route-id="@item.ID"
-                                       class="btn btn-sm btn-warning flex-fill">
-                                        <i class="bi bi-pencil me-1"></i>Edit
-                                    </a>
-                                    <a asp-action="Delete" asp-route-id="@item.ID"
-                                       class="btn btn-sm btn-outline-danger flex-fill">
-                                        <i class="bi bi-trash me-1"></i>
                                     </a>
                                 }
                             </div>
                         </div>
+
                     </div>
                 </div>
             }
         </div>
 
-        <!-- ── PAGINATION ────────────────────────────────── -->
+        <!-- PAGINATION -->
         @if (totalPages > 1)
         {
-            <nav class="mt-5 d-flex justify-content-center align-items-center gap-2" aria-label="Property pages">
-
-                
-                @if (currentPage > 1)
-                {
-                    <a href="@PageUrl(currentPage - 1)" class="page-btn page-btn-arrow" title="Previous">
-                        <i class="bi bi-chevron-left"></i>
-                    </a>
-                }
-                else
-                {
-                    <span class="page-btn page-btn-arrow disabled">
-                        <i class="bi bi-chevron-left"></i>
-                    </span>
-                }
-
-                
-                @{
-                    int startPage = Math.Max(1, currentPage - 2);
-                    int endPage = Math.Min(totalPages, currentPage + 2);
-                }
-
-                @if (startPage > 1)
-                {
-                    <a href="@PageUrl(1)" class="page-btn">1</a>
-                    @if (startPage > 2)
+            <nav class="mt-4" aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    @if (currentPage > 1)
                     {
-                        <span class="page-dots">…</span>
-                    }
-                }
-
-                @for (int p = startPage; p <= endPage; p++)
-                {
-                    @if (p == currentPage)
-                    {
-                        <span class="page-btn page-btn-active">@p</span>
+                        <li class="page-item">
+                            <a class="page-link" href="@PageUrl(currentPage - 1)">Previous</a>
+                        </li>
                     }
                     else
                     {
-                        <a href="@PageUrl(p)" class="page-btn">@p</a>
+                        <li class="page-item disabled"><span class="page-link">Previous</span></li>
                     }
-                }
 
-                @if (endPage < totalPages)
-                {
-                    @if (endPage < totalPages - 1)
+                    @for (int i = 1; i <= totalPages; i++)
                     {
-                        <span class="page-dots">…</span>
+                        if (i == currentPage)
+                        {
+                            <li class="page-item active"><span class="page-link">@i</span></li>
+                        }
+                        else
+                        {
+                            <li class="page-item"><a class="page-link" href="@PageUrl(i)">@i</a></li>
+                        }
                     }
-                    <a href="@PageUrl(totalPages)" class="page-btn">@totalPages</a>
-                }
 
-                
-                @if (currentPage < totalPages)
-                {
-                    <a href="@PageUrl(currentPage + 1)" class="page-btn page-btn-arrow" title="Next">
-                        <i class="bi bi-chevron-right"></i>
-                    </a>
-                }
-                else
-                {
-                    <span class="page-btn page-btn-arrow disabled">
-                        <i class="bi bi-chevron-right"></i>
-                    </span>
-                }
-
+                    @if (currentPage < totalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@PageUrl(currentPage + 1)">Next</a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="page-item disabled"><span class="page-link">Next</span></li>
+                    }
+                </ul>
             </nav>
-
-            <!-- Page info -->
-            <p class="text-center text-muted small mt-2">
-                Page @currentPage of @totalPages &nbsp;·&nbsp; @totalCount properties total
-            </p>
         }
     }
 </div>
 
-<style>
-    /* ── FILTER BAR ─────────────────────────────────── */
-    .filter-bar {
-        background: #fff;
-        border-radius: 12px;
-        padding: 1rem 1.25rem;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-
-    .filter-label {
-        font-size: 0.78rem;
-        font-weight: 600;
-        color: #666;
-        text-transform: uppercase;
-        letter-spacing: .04em;
-        display: block;
-        margin-bottom: 4px;
-    }
-
-    /* ── PROPERTY CARD ──────────────────────────────── */
-    .prop-card {
-        background: #fff;
-        border-radius: 16px;
-        overflow: hidden;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.07);
-        transition: all .3s;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-    }
-
-        .prop-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 36px rgba(0,0,0,0.13);
-        }
-
-    .prop-img-wrap {
-        position: relative;
-        height: 195px;
-        overflow: hidden;
-        background: #eee;
-        flex-shrink: 0;
-    }
-
-    .prop-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform .4s;
-    }
-
-    .prop-card:hover .prop-img {
-        transform: scale(1.05);
-    }
-
-    .prop-img-placeholder {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 3rem;
-        color: #ccc;
-        background: linear-gradient(135deg,#f8f9fa,#e9ecef);
-    }
-
-    .prop-type-badge {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        background: rgba(255,255,255,.95);
-        color: #e74c3c;
-        font-size: .72rem;
-        font-weight: 700;
-        padding: .2rem .65rem;
-        border-radius: 20px;
-        text-transform: uppercase;
-        letter-spacing: .05em;
-    }
-
-    .prop-status-badge {
-        position: absolute;
-        bottom: 10px;
-        left: 10px;
-        font-size: .72rem;
-        font-weight: 600;
-        padding: .2rem .65rem;
-        border-radius: 20px;
-    }
-
-    .badge-avail {
-        background: #d4edda;
-        color: #155724;
-    }
-
-    .badge-rented {
-        background: #fff3cd;
-        color: #856404;
-    }
-
-    .badge-sold {
-        background: #f8d7da;
-        color: #721c24;
-    }
-
-    .prop-heart {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        width: 32px;
-        height: 32px;
-        background: rgba(255,255,255,.9);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #ccc;
-        text-decoration: none;
-        transition: all .2s;
-        font-size: .95rem;
-    }
-
-        .prop-heart:hover, .prop-heart.hearted {
+@section Styles {
+    <style>
+        .filter-bar {
             background: #fff;
-            color: #e74c3c;
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .filter-label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.25rem;
         }
 
-    .prop-body {
-        padding: 1rem 1.1rem;
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-    }
-
-    .prop-price {
-        font-size: 1.1rem;
-        font-weight: 800;
-        color: #1a1a2e;
-    }
-
-    .prop-per {
-        font-size: .72rem;
-        font-weight: 400;
-        color: #888;
-    }
-
-    .prop-address {
-        font-size: .85rem;
-        font-weight: 500;
-        color: #333;
-        margin-bottom: .2rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .prop-specs {
-        display: flex;
-        gap: .6rem;
-        flex-wrap: wrap;
-        background: #f8f9fa;
-        border-radius: 8px;
-        padding: .45rem .7rem;
-    }
-
-        .prop-specs span {
-            font-size: .76rem;
-            color: #666;
+        .prop-card {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+            height: 100%;
+        }
+        .prop-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+        .prop-img-wrap {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+        }
+        .prop-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .prop-img-placeholder {
+            width: 100%;
+            height: 100%;
+            background: #e9ecef;
             display: flex;
             align-items: center;
-            gap: .25rem;
+            justify-content: center;
+            font-size: 3rem;
+            color: #adb5bd;
+        }
+        .prop-type-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(26,26,46,0.85);
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+        }
+        .prop-status-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+        }
+        .badge-avail { background: #d4edda; color: #155724; }
+        .badge-rented { background: #fff3cd; color: #856404; }
+        .badge-sold { background: #f8d7da; color: #721c24; }
+
+        .prop-heart {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 34px;
+            height: 34px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .prop-heart:hover, .prop-heart.hearted {
+            background: var(--sakany-primary);
+            color: #fff;
         }
 
-        .prop-specs i {
-            color: #e74c3c;
-            font-size: .78rem;
+        .prop-body {
+            padding: 1rem;
+        }
+        .prop-price {
+            color: var(--sakany-primary);
+            font-weight: 700;
+        }
+        .prop-per {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: #6c757d;
+        }
+        .prop-address {
+            font-size: 0.92rem;
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+        }
+        .prop-specs {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.82rem;
+            color: #6c757d;
+            border-top: 1px solid #e9ecef;
+            padding-top: 0.75rem;
+            margin-top: 0.75rem;
+        }
+        .prop-specs span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
         }
 
-    .prop-amenities {
-        display: flex;
-        flex-wrap: wrap;
-        gap: .35rem;
-        margin-top: .6rem;
-    }
-
-    .amenity-tag {
-        background: #f0f0f0;
-        color: #555;
-        font-size: .72rem;
-        padding: .15rem .55rem;
-        border-radius: 20px;
-    }
-
-    .prop-actions {
-        display: flex;
-        gap: .4rem;
-        flex-wrap: wrap;
-        margin-top: auto;
-    }
-
-        .prop-actions .btn {
-            font-size: .8rem;
+        .prop-amenities {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid #e9ecef;
+        }
+        .amenity-tag {
+            background: #e9ecef;
+            color: #495057;
+            font-size: 0.72rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
         }
 
-    /* ── PAGINATION ─────────────────────────────────── */
-    .page-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 38px;
-        height: 38px;
-        padding: 0 .6rem;
-        border-radius: 8px;
-        font-size: .875rem;
-        font-weight: 500;
-        color: #444;
-        background: #fff;
-        border: 1px solid #dee2e6;
-        text-decoration: none;
-        transition: all .2s;
-        cursor: pointer;
-    }
-
-        .page-btn:hover:not(.disabled):not(.page-btn-active) {
-            background: #f8f9fa;
-            border-color: #e74c3c;
-            color: #e74c3c;
+        .prop-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
         }
-
-    .page-btn-active {
-        background: #e74c3c;
-        border-color: #e74c3c;
-        color: #fff !important;
-        font-weight: 700;
-        cursor: default;
-        pointer-events: none;
-    }
-
-    .page-btn-arrow {
-        color: #555;
-    }
-
-    .page-btn.disabled {
-        opacity: .4;
-        cursor: not-allowed;
-        pointer-events: none;
-    }
-
-    .page-dots {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 28px;
-        height: 38px;
-        color: #aaa;
-        font-size: .85rem;
-        user-select: none;
-    }
-</style>
+    </style>
+}
