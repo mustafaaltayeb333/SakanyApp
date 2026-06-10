@@ -24,7 +24,6 @@ namespace Sakany.Controllers
         private bool IsOwner => SessionRole == "Owner";
         private bool IsTenant => SessionRole == "Tenant";
 
-        // ── helper: send a notification ───────────────────
         private async Task SendNotification(string userId, string title, string body)
         {
             _context.Notification.Add(new Notification
@@ -39,7 +38,6 @@ namespace Sakany.Controllers
             await _context.SaveChangesAsync();
         }
 
-        // ── helper: build Type / Status dropdowns ─────────
         private void BuildDropdowns(Property? p = null)
         {
             ViewBag.TypeList = Enum.GetValues(typeof(PropertyType))
@@ -61,7 +59,6 @@ namespace Sakany.Controllers
                 }).ToList();
         }
 
-        // ── helper: save uploaded image file ──────────────
         private async Task<string?> SaveImageFile(IFormFile file, string propertyId)
         {
             try
@@ -81,7 +78,6 @@ namespace Sakany.Controllers
             catch { return null; }
         }
 
-        // ── helper: persist images from form ──────────────
         private async Task SaveImages(
             string propertyId,
             IFormFile? mainFile, string? mainUrl,
@@ -155,24 +151,20 @@ namespace Sakany.Controllers
             if (maxPrice.HasValue)
                 query = query.Where(p => p.Price <= maxPrice);
 
-            // ── SORTING ───────────────────────────────────
             query = sortBy?.ToLowerInvariant() switch
             {
                 "price_asc" => query.OrderBy(p => p.Price),
                 "price_desc" => query.OrderByDescending(p => p.Price),
                 "recent" => query.OrderByDescending(p => p.CreatedAt),
-                _ => query.OrderByDescending(p => p.CreatedAt) // Default: recent first
+                _ => query.OrderByDescending(p => p.CreatedAt)
             };
 
-            // ── PAGINATION ────────────────────────────────
-            var paginatedResult = await PaginatedList<Property>.CreateAsync(
-                query, pageNumber, pageSize);
+            var paginatedResult = await PaginatedList<Property>.CreateAsync(query, pageNumber, pageSize);
 
             ViewBag.CurrentPage = paginatedResult.PageIndex;
             ViewBag.TotalPages = paginatedResult.TotalPages;
             ViewBag.TotalCount = paginatedResult.TotalCount;
 
-            // ── FILTER DROPDOWNS ──────────────────────────
             ViewBag.Cities = await _context.Property.Select(p => p.City).Distinct().OrderBy(c => c).ToListAsync();
             ViewBag.Types = Enum.GetNames(typeof(PropertyType));
             ViewBag.Statuses = Enum.GetNames(typeof(PropertyStatus));
@@ -257,9 +249,12 @@ namespace Sakany.Controllers
             if (IsTenant) { TempData["Error"] = "Only owners can list properties."; return RedirectToAction(nameof(Index)); }
 
             BuildDropdowns();
+
             if (IsAdmin)
                 ViewData["OwnerID"] = new SelectList(
                     _context.User.Where(u => u.Role == UserRole.Owner), "ID", "Name");
+            else
+                ViewBag.OwnerID = SessionUserID; // ✅ FIX
 
             return View(new Property { Status = PropertyStatus.Available, Type = PropertyType.Apartment });
         }
@@ -295,6 +290,8 @@ namespace Sakany.Controllers
                 property.ID = Guid.NewGuid().ToString();
                 property.CreatedAt = DateTime.Now;
                 if (!IsAdmin) property.Status = PropertyStatus.Available;
+                if (extraImages != null && extraImages.Count > 4)
+                    ModelState.AddModelError("", "You can upload a maximum of 4 extra images.");
 
                 _context.Add(property);
                 await _context.SaveChangesAsync();
@@ -304,11 +301,13 @@ namespace Sakany.Controllers
                 TempData["Success"] = "Property listed successfully!";
                 return RedirectToAction(nameof(Index));
             }
-
+           
             BuildDropdowns(property);
             if (IsAdmin)
                 ViewData["OwnerID"] = new SelectList(
                     _context.User.Where(u => u.Role == UserRole.Owner), "ID", "Name", property.OwnerID);
+            else
+                ViewBag.OwnerID = SessionUserID; // ✅ FIX
 
             return View(property);
         }
@@ -335,6 +334,7 @@ namespace Sakany.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            BuildDropdowns(property);
             if (IsAdmin)
                 ViewData["OwnerID"] = new SelectList(
                     _context.User.Where(u => u.Role == UserRole.Owner), "ID", "Name", property.OwnerID);
@@ -383,7 +383,6 @@ namespace Sakany.Controllers
                     _context.Update(property);
                     await _context.SaveChangesAsync();
 
-                    // Delete checked images
                     if (deleteImageIds?.Any() == true)
                     {
                         var toDelete = await _context.PropertyImage
@@ -415,7 +414,7 @@ namespace Sakany.Controllers
         }
 
         // ═══════════════════════════════════════════════════
-        // DELETE
+        // DELETE GET
         // ═══════════════════════════════════════════════════
         public async Task<IActionResult> Delete(string? id)
         {
@@ -432,14 +431,12 @@ namespace Sakany.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            if (IsTenant)
-            {
-                TempData["Error"] = "Tenants cannot delete properties.";
-                return RedirectToAction(nameof(Index));
-            }
             return View(property);
         }
 
+        // ═══════════════════════════════════════════════════
+        // DELETE POST
+        // ═══════════════════════════════════════════════════
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)

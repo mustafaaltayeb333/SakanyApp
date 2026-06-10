@@ -11,11 +11,10 @@
         </div>
         <div class="form-card-body">
 
-            <form asp-action="Create" method="post">
+            <form asp-action="Create" method="post" enctype="multipart/form-data">
                 @Html.AntiForgeryToken()
                 <div asp-validation-summary="ModelOnly" class="alert alert-danger small py-2"></div>
 
-                <!-- Owner (Admin only picks, Owner is auto-assigned) -->
                 @if (role == "Admin")
                 {
                     <div class="mb-3">
@@ -77,6 +76,28 @@
 
                 <hr class="my-4" />
 
+                <!-- Images -->
+                <!-- Images -->
+                <div class="mb-3">
+                    <label class="form-label fw-600">Main Image</label>
+                    <input type="file" name="imageFile" class="form-control" accept="image/*" />
+                    <input type="text" name="imageUrl" class="form-control mt-2"
+                           placeholder="Or paste image URL..." />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-600">
+                        Extra Images
+                        <span class="text-muted fw-normal">(optional, max 4)</span>
+                    </label>
+                    <input type="file" name="extraImages" class="form-control" accept="image/*"
+                           multiple id="extraImagesInput" />
+                    <div id="extraImagesError" class="text-danger small mt-1" style="display:none">
+                        You can upload a maximum of 4 extra images.
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-danger px-4">
                         <i class="bi bi-check-lg me-2"></i>List Property
@@ -119,7 +140,5 @@
 </style>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
 }

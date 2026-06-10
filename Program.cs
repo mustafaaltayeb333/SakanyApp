@@ -16,14 +16,14 @@ namespace Sakany
             builder.Services.AddControllersWithViews();
 
             // ── DATABASE ──────────────────────────────────
-			
-			string activeConnectionName = builder.Configuration["ActiveConnection"];
-			
-			string connectionString = builder.Configuration.GetConnectionString(activeConnectionName);
-			
-			
-           builder.Services.AddDbContext<SakanyDbContext>(options =>
-				options.UseSqlServer(connectionString));
+            string activeConnectionName = builder.Configuration["ActiveConnection"]
+                ?? throw new InvalidOperationException("'ActiveConnection' is missing from appsettings.json");
+
+            string connectionString = builder.Configuration.GetConnectionString(activeConnectionName)
+                ?? throw new InvalidOperationException($"Connection string '{activeConnectionName}' not found in appsettings.json");
+
+            builder.Services.AddDbContext<SakanyDbContext>(options =>
+                options.UseSqlServer(connectionString));
 
             // ── SESSION ───────────────────────────────────
             builder.Services.AddDistributedMemoryCache();
@@ -66,7 +66,6 @@ namespace Sakany
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
             app.Run();
-            
         }
     }
 }
