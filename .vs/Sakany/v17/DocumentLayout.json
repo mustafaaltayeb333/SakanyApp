@@ -1,65 +1,77 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\",
+  "WorkspaceRootPath": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project\\sakanyapp\\views\\property\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|solutionrelative:views\\property\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project last v\\sakanyapp\\migrations\\20260611035633_fixpropertytypes.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|solutionrelative:migrations\\20260611035633_fixpropertytypes.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project\\sakanyapp\\wwwroot\\css\\site.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
-      "RelativeMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|solutionrelative:wwwroot\\css\\site.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Migrations\\20260611034134_test.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Migrations\\20260611034134_test.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project\\sakanyapp\\views\\reviews\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|solutionrelative:views\\reviews\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project\\sakanyapp\\views\\reviews\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|solutionrelative:views\\reviews\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project\\sakanyapp\\views\\reviews\\delete.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|solutionrelative:views\\reviews\\delete.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project\\sakanyapp\\views\\reviews\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|solutionrelative:views\\reviews\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project\\sakanyapp\\views\\reviews\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|solutionrelative:views\\reviews\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project\\sakanyapp\\views\\requests\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|solutionrelative:views\\requests\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project\\sakanyapp\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project\\sakanyapp\\services\\notificationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|solutionrelative:services\\notificationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project\\sakanyapp\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|solutionrelative:controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project\\sakanyapp\\repomix-output.xml||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|solutionrelative:repomix-output.xml||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project\\sakanyapp\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project last v\\sakanyapp\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
       "RelativeMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project\\sakanyapp\\migrations\\20260514025752_initnseed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project last v\\sakanyapp\\data\\sakanydbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|solutionrelative:data\\sakanydbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project last v\\sakanyapp\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project last v\\sakanyapp\\views\\property\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|solutionrelative:views\\property\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project last v\\sakanyapp\\wwwroot\\css\\site.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|solutionrelative:wwwroot\\css\\site.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project last v\\sakanyapp\\views\\reviews\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|solutionrelative:views\\reviews\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project last v\\sakanyapp\\views\\reviews\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|solutionrelative:views\\reviews\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project last v\\sakanyapp\\views\\reviews\\delete.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|solutionrelative:views\\reviews\\delete.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project last v\\sakanyapp\\views\\reviews\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|solutionrelative:views\\reviews\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project last v\\sakanyapp\\views\\reviews\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|solutionrelative:views\\reviews\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project last v\\sakanyapp\\views\\requests\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|solutionrelative:views\\requests\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project last v\\sakanyapp\\services\\notificationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|solutionrelative:services\\notificationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project last v\\sakanyapp\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|solutionrelative:controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project last v\\sakanyapp\\repomix-output.xml||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|solutionrelative:repomix-output.xml||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project last v\\sakanyapp\\migrations\\20260514025752_initnseed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|solutionrelative:migrations\\20260514025752_initnseed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project\\sakanyapp\\controllers\\amenitycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|c:\\users\\notebook\\desktop\\wdt project last v\\sakanyapp\\controllers\\amenitycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{B848F5A5-3A1A-4551-A954-ED8D382177DA}|Sakany.csproj|solutionrelative:controllers\\amenitycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -75,126 +87,155 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "Index.cshtml",
-              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\Views\\Property\\Index.cshtml",
-              "RelativeDocumentMoniker": "Views\\Property\\Index.cshtml",
-              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\Views\\Property\\Index.cshtml",
-              "RelativeToolTip": "Views\\Property\\Index.cshtml",
-              "ViewState": "AgIAAPMAAAAAAAAAAAAkwG0BAAAVAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-06-09T20:51:50.507Z",
+              "Title": "20260611035633_FixPropertyTypes.cs",
+              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Migrations\\20260611035633_FixPropertyTypes.cs",
+              "RelativeDocumentMoniker": "Migrations\\20260611035633_FixPropertyTypes.cs",
+              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Migrations\\20260611035633_FixPropertyTypes.cs",
+              "RelativeToolTip": "Migrations\\20260611035633_FixPropertyTypes.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAQwBMAAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-11T03:56:33.723Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "site.css",
-              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\wwwroot\\css\\site.css",
-              "RelativeDocumentMoniker": "wwwroot\\css\\site.css",
-              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\wwwroot\\css\\site.css",
-              "RelativeToolTip": "wwwroot\\css\\site.css",
-              "ViewState": "AgIAACAAAAAAAAAAAAAwwDcAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
-              "WhenOpened": "2026-06-09T20:47:54.871Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "Create.cshtml",
-              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\Views\\Reviews\\Create.cshtml",
-              "RelativeDocumentMoniker": "Views\\Reviews\\Create.cshtml",
-              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\Views\\Reviews\\Create.cshtml",
-              "RelativeToolTip": "Views\\Reviews\\Create.cshtml",
-              "ViewState": "AgIAAI0AAAAAAAAAAAAAwKIAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-06-09T20:36:16.908Z",
-              "EditorCaption": ""
+              "Title": "20260611034134_test.cs",
+              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Migrations\\20260611034134_test.cs",
+              "RelativeDocumentMoniker": "Migrations\\20260611034134_test.cs",
+              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Migrations\\20260611034134_test.cs",
+              "RelativeToolTip": "Migrations\\20260611034134_test.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-11T03:41:35.09Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "Details.cshtml",
-              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\Views\\Reviews\\Details.cshtml",
-              "RelativeDocumentMoniker": "Views\\Reviews\\Details.cshtml",
-              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\Views\\Reviews\\Details.cshtml",
-              "RelativeToolTip": "Views\\Reviews\\Details.cshtml",
-              "ViewState": "AgIAAGgAAAAAAAAAAAAAwH0AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-06-09T20:34:07.664Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "Delete.cshtml",
-              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\Views\\Reviews\\Delete.cshtml",
-              "RelativeDocumentMoniker": "Views\\Reviews\\Delete.cshtml",
-              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\Views\\Reviews\\Delete.cshtml",
-              "RelativeToolTip": "Views\\Reviews\\Delete.cshtml",
-              "ViewState": "AgIAAEAAAAAAAAAAAAAAwFUAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-06-09T20:29:32.432Z",
-              "EditorCaption": ""
+              "Title": "SakanyDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Data\\SakanyDbContext.cs",
+              "RelativeDocumentMoniker": "Data\\SakanyDbContext.cs",
+              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Data\\SakanyDbContext.cs",
+              "RelativeToolTip": "Data\\SakanyDbContext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-11T03:27:46.506Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 5,
-              "Title": "Edit.cshtml",
-              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\Views\\Reviews\\Edit.cshtml",
-              "RelativeDocumentMoniker": "Views\\Reviews\\Edit.cshtml",
-              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\Views\\Reviews\\Edit.cshtml",
-              "RelativeToolTip": "Views\\Reviews\\Edit.cshtml",
-              "ViewState": "AgIAAEkAAAAAAAAAAAAuwGAAAAAAAAAAAAAAAA==",
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Views\\Property\\Index.cshtml",
+              "RelativeDocumentMoniker": "Views\\Property\\Index.cshtml",
+              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Views\\Property\\Index.cshtml",
+              "RelativeToolTip": "Views\\Property\\Index.cshtml",
+              "ViewState": "AgIAAB4BAAAAAAAAAADgvycBAAAZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-06-09T20:27:14.207Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-09T20:51:50.507Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 6,
-              "Title": "Index.cshtml",
-              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\Views\\Reviews\\Index.cshtml",
-              "RelativeDocumentMoniker": "Views\\Reviews\\Index.cshtml",
-              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\Views\\Reviews\\Index.cshtml",
-              "RelativeToolTip": "Views\\Reviews\\Index.cshtml",
-              "ViewState": "AgIAADABAAAAAAAAAAAuwEcBAAAIAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-06-09T20:22:04.825Z",
-              "EditorCaption": ""
+              "Title": "site.css",
+              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\wwwroot\\css\\site.css",
+              "RelativeDocumentMoniker": "wwwroot\\css\\site.css",
+              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\wwwroot\\css\\site.css",
+              "RelativeToolTip": "wwwroot\\css\\site.css",
+              "ViewState": "AgIAACAAAAAAAAAAAAAwwDcAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2026-06-09T20:47:54.871Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 7,
-              "Title": "Details.cshtml",
-              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\Views\\Requests\\Details.cshtml",
-              "RelativeDocumentMoniker": "Views\\Requests\\Details.cshtml",
-              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\Views\\Requests\\Details.cshtml",
-              "RelativeToolTip": "Views\\Requests\\Details.cshtml",
-              "ViewState": "AgIAAA8BAAAAAAAAAAAuwCYBAAAGAAAAAAAAAA==",
+              "Title": "Create.cshtml",
+              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Views\\Reviews\\Create.cshtml",
+              "RelativeDocumentMoniker": "Views\\Reviews\\Create.cshtml",
+              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Views\\Reviews\\Create.cshtml",
+              "RelativeToolTip": "Views\\Reviews\\Create.cshtml",
+              "ViewState": "AgIAAI0AAAAAAAAAAAAAwKIAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-06-09T19:45:45.546Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-09T20:36:16.908Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 8,
+              "Title": "Details.cshtml",
+              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Views\\Reviews\\Details.cshtml",
+              "RelativeDocumentMoniker": "Views\\Reviews\\Details.cshtml",
+              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Views\\Reviews\\Details.cshtml",
+              "RelativeToolTip": "Views\\Reviews\\Details.cshtml",
+              "ViewState": "AgIAAGgAAAAAAAAAAAAAwH0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-09T20:34:07.664Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Delete.cshtml",
+              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Views\\Reviews\\Delete.cshtml",
+              "RelativeDocumentMoniker": "Views\\Reviews\\Delete.cshtml",
+              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Views\\Reviews\\Delete.cshtml",
+              "RelativeToolTip": "Views\\Reviews\\Delete.cshtml",
+              "ViewState": "AgIAAEAAAAAAAAAAAAAAwFUAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-09T20:29:32.432Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "Edit.cshtml",
+              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Views\\Reviews\\Edit.cshtml",
+              "RelativeDocumentMoniker": "Views\\Reviews\\Edit.cshtml",
+              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Views\\Reviews\\Edit.cshtml",
+              "RelativeToolTip": "Views\\Reviews\\Edit.cshtml",
+              "ViewState": "AgIAAEkAAAAAAAAAAAAuwGAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-09T20:27:14.207Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Views\\Reviews\\Index.cshtml",
+              "RelativeDocumentMoniker": "Views\\Reviews\\Index.cshtml",
+              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Views\\Reviews\\Index.cshtml",
+              "RelativeToolTip": "Views\\Reviews\\Index.cshtml",
+              "ViewState": "AgIAADABAAAAAAAAAAAuwEcBAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-09T20:22:04.825Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "Details.cshtml",
+              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Views\\Requests\\Details.cshtml",
+              "RelativeDocumentMoniker": "Views\\Requests\\Details.cshtml",
+              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Views\\Requests\\Details.cshtml",
+              "RelativeToolTip": "Views\\Requests\\Details.cshtml",
+              "ViewState": "AgIAAA8BAAAAAAAAAAAuwCYBAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-09T19:45:45.546Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
               "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\Program.cs",
+              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
-              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\Program.cs",
+              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Program.cs",
               "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAABUAAAAAAAAAAAAuwCwAAAA3AAAAAAAAAA==",
+              "ViewState": "AgIAADEAAAAAAAAAAAAAwEYAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-06-09T19:28:13.434Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 13,
               "Title": "NotificationService.cs",
-              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\Services\\NotificationService.cs",
+              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Services\\NotificationService.cs",
               "RelativeDocumentMoniker": "Services\\NotificationService.cs",
-              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\Services\\NotificationService.cs",
+              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Services\\NotificationService.cs",
               "RelativeToolTip": "Services\\NotificationService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAACAAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -202,11 +243,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 14,
               "Title": "AccountController.cs",
-              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\Controllers\\AccountController.cs",
+              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Controllers\\AccountController.cs",
               "RelativeDocumentMoniker": "Controllers\\AccountController.cs",
-              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\Controllers\\AccountController.cs",
+              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Controllers\\AccountController.cs",
               "RelativeToolTip": "Controllers\\AccountController.cs",
               "ViewState": "AgIAAL4AAAAAAAAAAAAvwNwAAABBAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -214,11 +255,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 15,
               "Title": "repomix-output.xml",
-              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\repomix-output.xml",
+              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\repomix-output.xml",
               "RelativeDocumentMoniker": "repomix-output.xml",
-              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\repomix-output.xml",
+              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\repomix-output.xml",
               "RelativeToolTip": "repomix-output.xml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003576|",
@@ -226,11 +267,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 16,
               "Title": "20260514025752_initNSeed.cs",
-              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\Migrations\\20260514025752_initNSeed.cs",
+              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Migrations\\20260514025752_initNSeed.cs",
               "RelativeDocumentMoniker": "Migrations\\20260514025752_initNSeed.cs",
-              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\Migrations\\20260514025752_initNSeed.cs",
+              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Migrations\\20260514025752_initNSeed.cs",
               "RelativeToolTip": "Migrations\\20260514025752_initNSeed.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -238,11 +279,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 2,
               "Title": "appsettings.json",
-              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\appsettings.json",
+              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\appsettings.json",
               "RelativeDocumentMoniker": "appsettings.json",
-              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\appsettings.json",
+              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\appsettings.json",
               "RelativeToolTip": "appsettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAABzAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
@@ -250,11 +291,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 17,
               "Title": "AmenityController.cs",
-              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\Controllers\\AmenityController.cs",
+              "DocumentMoniker": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Controllers\\AmenityController.cs",
               "RelativeDocumentMoniker": "Controllers\\AmenityController.cs",
-              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT project\\SakanyApp\\Controllers\\AmenityController.cs",
+              "ToolTip": "C:\\Users\\Notebook\\Desktop\\WDT Project last V\\SakanyApp\\Controllers\\AmenityController.cs",
               "RelativeToolTip": "Controllers\\AmenityController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",

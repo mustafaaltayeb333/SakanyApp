@@ -6,7 +6,9 @@ namespace Sakany.Data
 {
     public class SakanyDbContext : DbContext
     {
-        public SakanyDbContext(DbContextOptions options) : base(options)
+        public SakanyDbContext(
+    DbContextOptions<SakanyDbContext> options)
+    : base(options)
         {
         }
 
@@ -198,7 +200,7 @@ namespace Sakany.Data
                 new User { ID = "O1", Name = "Ahmed Owner", Email = "ahmed@example.com", Password = PasswordHasher.Hash("hashed_pass"), Phone = "01012345678", Role = (UserRole)1 },
                 new User { ID = "O2", Name = "Sara Owner", Email = "sara@example.com", Password = PasswordHasher.Hash("hashed_pass"), Phone = "01012345679", Role = (UserRole)1 },
                 new User { ID = "O3", Name = "Mona Owner", Email = "mona@example.com", Password = PasswordHasher.Hash("hashed_pass"), Phone = "01012345680", Role = (UserRole)1 },
-                new User { ID = "O4", Name = "Omar Owner", Email = "omar@example.com", Password = PasswordHasher.Hash("hashed_pass") Phone = "01012345681", Role = (UserRole)1 },
+                new User { ID = "O4", Name = "Omar Owner", Email = "omar@example.com", Password = PasswordHasher.Hash("hashed_pass") ,Phone = "01012345681", Role = (UserRole)1 },
                 new User { ID = "O5", Name = "Zain Owner", Email = "zain@example.com", Password = PasswordHasher.Hash("hashed_pass"), Phone = "01012345682", Role = (UserRole)1 },
 				new User { ID = "O6", Name = "Jose Gonzales", Email = "admin@example.com", Password = PasswordHasher.Hash("hashed_pass"), Phone = "01012345682", Role = (UserRole)0 }
             );
